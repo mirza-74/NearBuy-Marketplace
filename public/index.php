@@ -4,24 +4,26 @@
 // ===============================================================
 declare(strict_types=1);
 
-$BASE = '/NearBuy/public';
+// BASE: otomatis ambil folder /public yang sedang dipakai
+$scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+$BASE = rtrim($scriptDir, '/');
+
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/settings.php';
 require_once __DIR__ . '/../includes/header.php';
 
+// data user (boleh kosong = guest)
 $user   = $_SESSION['user'] ?? null;
 $role   = $user['role'] ?? 'guest';
 $userId = (int)($user['id'] ?? 0);
+$isGuest = ($role === 'guest' || $userId <= 0);
 
-// ===================== BATAS AKSES: WAJIB LOGIN =====================
-if ($role === 'guest' || $userId <= 0) {
-    header('Location: ' . $BASE . '/login.php');
-    exit;
-}
+// TIDAK ADA LAGI REDIRECT WAJIB LOGIN DI SINI
+// Guest boleh melihat beranda, hanya tidak bisa checkout di halaman lain
 
-// poin user kalau nanti mau dipakai
-$userPoints = (int)($user['points'] ?? 0);
+// poin user kalau mau dipakai (guest = 0 saja)
+$userPoints = $isGuest ? 0 : (int)($user['points'] ?? 0);
 
 // lokasi user disimpan di session jika sudah di set dari halaman lain
 $userLat = isset($_SESSION['user_lat']) ? (float)$_SESSION['user_lat'] : null;
@@ -63,9 +65,6 @@ $homeBannerPath = (function() use ($pdo, $BASE) {
 })();
 
 // ===================== PRODUK KEBUTUHAN SEHARI HARI =====================
-// Misalnya kita batasi hanya kategori tertentu seperti
-// beras, air-galon, gas-elpiji, bahan-pokok, makanan-minuman
-// Sesuaikan dengan slug kategori yang kamu punya di database
 
 $dailySlugList = [
     'beras',
@@ -99,7 +98,6 @@ if ($searchQ !== '') {
 }
 
 // ===================== REKOMENDASI: PRODUK TERDEKAT =====================
-// Diambil dari tabel shops yang punya latitude dan longitude
 $rekom = [];
 
 if ($userLat !== null && $userLng !== null) {
@@ -352,7 +350,7 @@ if (!empty($idRows)) {
 
   </div>
 
-  <!-- Sidebar bisa diisi info NearBuy atau dibiarkan kosong dulu -->
+  <!-- Sidebar -->
   <aside class="sidebar">
     <div class="card" style="padding:12px;">
       <h4>NearBuy</h4>
