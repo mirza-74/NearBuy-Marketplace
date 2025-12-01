@@ -1,34 +1,34 @@
 <?php
 // ===============================================================
-// NearBuy – Logout
+// NearBuy – Logout FIXED BASE
 // ===============================================================
 declare(strict_types=1);
 
-require_once __DIR__ . '/../includes/session.php';
-
-if (!isset($BASE) || !$BASE) {
-    $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
-    if (preg_match('~^(.*/public)~', $scriptDir, $m)) {
-        $BASE = $m[1];
-    } else {
-        $BASE = '/NearBuy-marketplace/public';
-    }
+// Pastikan session berjalan
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
-$BASE = '/' . ltrim($BASE, '/');
-$BASE = rtrim($BASE, '/');
 
+// ================================================
+// FIX: Set BASE ke lokasi project kamu SECARA MANUAL
+// ================================================
+// GANTI sesuai folder di htdocs kamu
+$BASE = '/NearBuy-marketplace/public';
+
+// ================================================
+// Hapus user dari session
+// ================================================
 $_SESSION['user'] = null;
 unset($_SESSION['user']);
 
+// Regenerasi session_id untuk keamanan
 if (function_exists('session_regenerate_id')) {
     session_regenerate_id(true);
 }
 
-if (!empty($_COOKIE['sellexa_remember'])) {
-    setcookie('sellexa_remember', '', time() - 3600, '/', '', false, true);
-}
+// Flash message (opsional)
+$_SESSION['flash'] = 'Kamu telah logout';
 
-$_SESSION['flash'] = 'Kamu sudah logout. Sampai jumpa lagi.';
-
+// Redirect ke halaman utama
 header('Location: ' . $BASE . '/index.php');
 exit;
