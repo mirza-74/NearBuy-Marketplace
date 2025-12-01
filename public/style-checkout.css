@@ -1,0 +1,498 @@
+/* =========================================================
+   SellExa – Checkout Styles (mirip Tokped, warna logo)
+   ========================================================= */
+
+:root{
+  --brand:#1e2a47;
+  --brand-2:#4b5d88;
+  --brand-grad-start:#22c1ff;  /* biru logo */
+  --brand-grad-end:#7c3aed;    /* ungu logo */
+  --bg:#f7f8fb;
+  --card:#ffffff;
+  --border:#e5e7eb;
+  --text:#111827;
+  --muted:#6b7280;
+}
+
+/* biar halaman checkout kelihatan bersih */
+body{
+  background:var(--bg);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
+}
+
+/* Wrapper utama */
+.checkout-page{
+  max-width:900px;
+  margin:12px auto 90px;
+  padding:0 16px 40px;
+}
+
+.co-title{
+  font-size:20px;
+  font-weight:700;
+  margin:10px 0 16px;
+}
+
+/* Card umum */
+.co-card{
+  background:var(--card);
+  border-radius:14px;
+  border:1px solid var(--border);
+  padding:14px 14px 16px;
+  margin-bottom:12px;
+  box-shadow:0 2px 6px rgba(0,0,0,.03);
+}
+
+/* Judul section (“Pesanan kamu”, “Pengiriman”, dll) */
+.co-section-title{
+  margin:0 0 10px;
+  font-size:16px;
+  font-weight:700;
+  color:var(--text);
+}
+
+/* =========================================================
+   Alamat Pengiriman
+   ========================================================= */
+.co-address-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+}
+.co-address-label{
+  font-size:13px;
+  color:var(--muted);
+}
+.co-address-edit{
+  font-size:12px;
+  color:#22c55e;
+  text-decoration:none;
+  font-weight:600;
+}
+.co-address-edit:hover{
+  text-decoration:underline;
+}
+
+.co-address-body{
+  font-size:13px;
+}
+.co-address-name{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  font-weight:600;
+  margin-bottom:2px;
+}
+.co-address-phone{
+  color:var(--muted);
+  font-weight:500;
+}
+.co-address-detail{
+  color:var(--muted);
+  line-height:1.4;
+}
+
+/* =========================================================
+   List Barang (Pesanan kamu)
+   ========================================================= */
+.co-items .co-item-row{
+  display:flex;
+  gap:10px;
+  padding:10px 0;
+  border-top:1px solid #f3f4f6;
+}
+.co-items .co-item-row:first-of-type{
+  border-top:none;
+}
+
+.co-item-left{
+  flex-shrink:0;
+}
+.co-item-img{
+  width:60px;
+  height:60px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  object-fit:cover;
+  background:#f3f4f6;
+}
+
+.co-item-body{
+  flex:1;
+  min-width:0;
+}
+
+.co-item-title{
+  display:inline-block;
+  font-size:14px;
+  font-weight:600;
+  margin-bottom:4px;
+  color:#1d4ed8;
+  text-decoration:none;
+}
+.co-item-title:hover{
+  text-decoration:underline;
+}
+
+.co-item-meta{
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:4px;
+}
+
+.co-item-price{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:13px;
+  margin-bottom:2px;
+}
+.co-item-price-current{
+  font-weight:700;
+  color:var(--text);
+}
+.co-item-price-compare{
+  font-size:12px;
+  color:#9ca3af;
+  text-decoration:line-through;
+}
+
+.co-item-subtotal{
+  font-size:13px;
+  color:#111827;
+}
+
+/* =========================================================
+   Pengiriman & Catatan
+   ========================================================= */
+.co-shipping-row{
+  font-size:13px;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.co-ship-name{
+  font-weight:600;
+}
+.co-ship-estimasi{
+  color:var(--muted);
+}
+.co-ship-total{
+  margin-top:4px;
+  font-size:13px;
+}
+
+/* Catatan (textarea) */
+.co-note{
+  margin-top:12px;
+}
+.co-note-label{
+  display:block;
+  font-size:13px;
+  margin-bottom:4px;
+}
+.co-note-text{
+  width:100%;
+  border-radius:10px;
+  border:1px solid var(--border);
+  padding:9px 11px;
+  font-family:inherit;
+  font-size:13px;
+  resize:vertical;
+  background:#f9fafb;
+  color:var(--text);
+  min-height:60px;
+}
+.co-note-text::placeholder{
+  color:#9ca3af;
+}
+
+/* =========================================================
+   Metode Pembayaran
+   ========================================================= */
+.co-payment .co-section-title{
+  margin-bottom:6px;
+}
+
+.co-pay-option{
+  padding:6px 0;
+}
+.co-pay-option label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:13px;
+  cursor:pointer;
+}
+.co-pay-option input[type="radio"]{
+  width:16px;
+  height:16px;
+}
+.co-pay-option span{
+  color:var(--text);
+}
+
+/* =========================================================
+   Ringkasan Belanja
+   ========================================================= */
+.co-summary .co-section-title{
+  margin-bottom:6px;
+}
+
+.co-summary-row{
+  display:flex;
+  justify-content:space-between;
+  font-size:13px;
+  margin:3px 0;
+}
+.co-summary-row span:first-child{
+  color:var(--muted);
+}
+.co-summary-row span:last-child{
+  color:var(--text);
+}
+.co-summary-row:nth-child(4) span:last-child{
+  color:#ef4444;  /* diskon merah */
+}
+
+.co-summary-total-row{
+  display:flex;
+  justify-content:space-between;
+  margin-top:8px;
+  padding-top:6px;
+  border-top:1px dashed #e5e7eb;
+  font-size:14px;
+}
+.co-summary-total{
+  font-weight:700;
+  color:#111827;
+}
+
+/* =========================================================
+   Bottom fixed bar (Total Tagihan + Bayar Sekarang)
+   ========================================================= */
+.co-bottom-bar{
+  position:sticky;
+  bottom:0;
+  margin-top:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding:10px 0 0;
+  border-top:1px solid #e5e7eb;
+  background:var(--bg);
+}
+.co-bottom-left{
+  display:flex;
+  flex-direction:column;
+}
+.co-bottom-label{
+  font-size:12px;
+  color:var(--muted);
+}
+.co-bottom-amount{
+  font-size:16px;
+  font-weight:700;
+  color:#111827;
+}
+
+.co-bottom-right{
+  flex-shrink:0;
+}
+.co-btn-pay{
+  border:none;
+  border-radius:999px;
+  padding:10px 22px;
+  font-weight:700;
+  cursor:pointer;
+  color:#fff;
+  background:linear-gradient(135deg,var(--brand-grad-start),var(--brand-grad-end));
+  box-shadow:0 4px 10px rgba(124,58,237,.35);
+  font-size:14px;
+}
+.co-btn-pay:hover{
+  opacity:.9;
+}
+
+/* =========================================================
+   Success Page (kalau nanti dipakai)
+   ========================================================= */
+.checkout-success-body{
+  background:var(--bg);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
+}
+.checkout-success-box{
+  max-width:480px;
+  margin:60px auto;
+  background:#fff;
+  border-radius:16px;
+  padding:24px 20px 26px;
+  text-align:center;
+  border:1px solid var(--border);
+  box-shadow:0 8px 24px rgba(0,0,0,.06);
+}
+.checkout-success-box h1{
+  margin-top:0;
+  margin-bottom:10px;
+  font-size:20px;
+}
+.checkout-success-box p{
+  font-size:14px;
+  color:var(--muted);
+}
+.co-btn-back{
+  display:inline-block;
+  margin-top:14px;
+  padding:9px 18px;
+  border-radius:999px;
+  font-weight:600;
+  text-decoration:none;
+  color:#fff;
+  background:linear-gradient(135deg,var(--brand-grad-start),var(--brand-grad-end));
+}
+
+/* =========================================================
+   RESPONSIVE (Mobile)
+   ========================================================= */
+@media (max-width:600px){
+  .checkout-page{
+    margin-top:6px;
+    padding:0 10px 90px;
+  }
+  .co-card{
+    padding:12px;
+  }
+  .co-item-img{
+    width:54px;
+    height:54px;
+  }
+  .co-bottom-bar{
+    padding:10px 0 4px;
+  }
+  .co-btn-pay{
+    padding:9px 18px;
+    font-size:13px;
+  }
+}
+/* ========== Checkout Success ========== */
+.checkout-success-page {
+  max-width: 880px;
+  margin: 32px auto 48px;
+  padding: 0 16px;
+}
+
+.co-success-card {
+  text-align: center;
+}
+
+.co-success-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+.co-success-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.co-success-text {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.co-success-summary {
+  margin: 0 auto 20px;
+  max-width: 420px;
+  text-align: left;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  padding: 12px 16px;
+  background: #fafafa;
+}
+
+.co-success-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  padding: 4px 0;
+}
+
+.co-success-row + .co-success-row {
+  border-top: 1px dashed #e0e0e0;
+}
+
+.co-success-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  display: inline-block;
+  padding: 8px 16px;
+  background: #0d6efd;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.btn-primary:hover {
+  background: #0b5ed7;
+}
+
+.btn-ghost {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  color: #333;
+  background: #fff;
+}
+
+.btn-ghost:hover {
+  background: #f5f5f5;
+}
+
+/* Badge status */
+.badge-status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-menunggu_pembayaran {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.badge-diproses {
+  background: #cfe2ff;
+  color: #084298;
+}
+
+.badge-dikirim {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.badge-selesai {
+  background: #e2f5d5;
+  color: #1f5e1f;
+}
+
+.badge-dibatalkan {
+  background: #f8d7da;
+  color: #842029;
+}

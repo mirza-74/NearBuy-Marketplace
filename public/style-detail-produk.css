@@ -1,0 +1,436 @@
+/* ================== DETAIL PRODUK – SellExa ================== */
+
+.detail-page {
+  max-width: 1120px;
+  margin: 24px auto 40px;
+  padding: 0 16px;
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Poppins", sans-serif;
+}
+
+/* Breadcrumb */
+.detail-breadcrumb {
+  font-size: 0.86rem;
+  color: #6b7280;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.detail-breadcrumb a {
+  color: #0f172a;
+  text-decoration: none;
+}
+.detail-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+/* Layout utama */
+.detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr);
+  gap: 28px;
+  align-items: flex-start;
+}
+
+/* --------- Kiri: Foto --------- */
+.detail-left 
+
+.detail-photo-wrap {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+
+.detail-photo-main {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+  max-height: 420px;
+}
+
+/* Tombol wishlist di foto */
+.detail-wish-form {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+.btn-wish {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.95);
+  color: #9ca3af;
+  font-size: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .18s ease;
+}
+.btn-wish:hover {
+  border-color: #fb7185;
+  color: #fb7185;
+  background: #fff1f2;
+}
+.btn-wish.active {
+  border-color: #fb7185;
+  background: #fee2e2;
+  color: #e11d48;
+}
+
+/* Thumbnail */
+.detail-thumbs {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.detail-thumb {
+  width: 68px;
+  height: 68px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+.detail-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --------- Kanan: Info --------- */
+.detail-right {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  padding: 18px 18px 20px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.03);
+  box-sizing: border-box;
+}
+
+.detail-header {
+  margin-bottom: 10px;
+}
+.detail-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+.detail-title {
+  margin: 6px 0 0;
+  font-size: 1.35rem;
+  font-weight: 650;
+  color: #0f172a;
+}
+
+/* Harga */
+.detail-price-block {
+  margin-top: 10px;
+  margin-bottom: 12px;
+}
+.detail-price-main {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.detail-price-now {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+}
+.detail-price-old {
+  font-size: 0.9rem;
+  color: #9ca3af;
+  text-decoration: line-through;
+}
+.detail-price-info {
+  margin-top: 4px;
+}
+.detail-price-disc {
+  display: inline-flex;
+  padding: 3px 8px;
+  font-size: 0.78rem;
+  border-radius: 999px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+/* Meta */
+.detail-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px 10px;
+  margin-top: 10px;
+  margin-bottom: 14px;
+}
+.detail-meta-item .label {
+  display: block;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+.detail-meta-item .value {
+  font-size: 0.9rem;
+  color: #111827;
+  font-weight: 500;
+}
+.detail-meta-item .value.in-stock {
+  color: #16a34a;
+}
+.detail-meta-item .value.out-stock {
+  color: #dc2626;
+}
+
+/* Box beli */
+.detail-buy-box {
+  margin: 14px 0 18px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #f9fafb;
+  border: 1px dashed #e5e7eb;
+}
+
+.detail-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-qty-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.detail-qty-row label {
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+.detail-qty-row input[type="number"] {
+  width: 72px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  font-size: 0.88rem;
+}
+
+.detail-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Tombol */
+.btn-primary,
+.btn-secondary {
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all .18s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 130px;
+}
+
+.btn-primary {
+  background: #1f2937;
+  color: #ffffff;
+}
+.btn-primary:hover {
+  background: #111827;
+}
+
+.btn-secondary {
+  background: #eef2ff;
+  color: #3730a3;
+}
+.btn-secondary:hover {
+  background: #e0e7ff;
+}
+
+/* Form buy_now di samping */
+.detail-form-inline {
+  margin-top: 8px;
+}
+
+/* Deskripsi */
+.detail-desc {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 10px;
+  margin-top: 6px;
+}
+.detail-desc h2 {
+  font-size: 1rem;
+  margin: 0 0 4px;
+  color: #111827;
+}
+.detail-desc p {
+  font-size: 0.9rem;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+/* Not found */
+.detail-not-found {
+  max-width: 500px;
+  margin: 40px auto;
+  text-align: center;
+  padding: 24px 20px;
+  border-radius: 16px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+.btn-back-home {
+  display: inline-flex;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  font-size: 0.9rem;
+  color: #111827;
+  text-decoration: none;
+  margin-top: 12px;
+}
+.btn-back-home:hover {
+  background: #f3f4f6;
+}
+
+/* Responsif */
+@media (max-width: 900px) {
+  .detail-layout {
+    grid-template-columns: 1fr;
+  }
+  .detail-right {
+    margin-top: 10px;
+  }
+}
+
+/* ================== MUNGKIN KAMU SUKA ================== */
+
+.detail-related {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.detail-related-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.detail-related-head h2 {
+  font-size: 1rem;
+  margin: 0;
+  color: #111827;
+  font-weight: 600;
+}
+
+.detail-related-sub {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.detail-related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.detail-rel-card {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  overflow: hidden;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+.detail-rel-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
+  border-color: #cbd5f5;
+}
+
+.detail-rel-img-wrap {
+  position: relative;
+  width: 100%;
+  padding-top: 70%;
+  background: #f9fafb;
+  overflow: hidden;
+}
+
+.detail-rel-img-wrap img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.detail-rel-badge {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  padding: 3px 7px;
+  font-size: 0.7rem;
+  border-radius: 999px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.detail-rel-body {
+  padding: 8px 10px 10px;
+}
+
+.detail-rel-title {
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+  color: #111827;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.detail-rel-price {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: baseline;
+  font-size: 0.85rem;
+}
+
+.detail-rel-price .old {
+  color: #9ca3af;
+  text-decoration: line-through;
+}
+
+.detail-rel-price .now {
+  color: #111827;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .detail-related-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

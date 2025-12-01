@@ -1,0 +1,169 @@
+/* =========================================================
+   SellExa – Admin Dashboard Styles
+   (dibuat mirip layout halaman profil: kartu putih, rapi)
+   ========================================================= */
+
+/* Wrapper utama konten admin */
+.admin-shell{
+  max-width: 960px;
+  margin: 16px auto 40px;
+  padding: 0 16px 40px;
+}
+
+/* ========== HEADER SECTION (judul + sapaan) ========== */
+
+.admin-page-header{
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, .05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-page-title{
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.admin-page-subtitle{
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* kalau mau icon kecil di kanan (optional) */
+.admin-page-header .admin-header-icon{
+  font-size: 26px;
+}
+
+/* ========== GRID RINGKASAN (kartu angka) ========== */
+
+.admin-grid{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.admin-card{
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  padding: 12px 12px 14px;
+  box-shadow: 0 3px 8px rgba(15, 23, 42, .03);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-card-label{
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.admin-card-value{
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.admin-card-desc{
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* beda sedikit di kartu terakhir (pendapatan admin) */
+.admin-card:last-child .admin-card-value{
+  color: #22c55e;
+}
+
+/* ========== SECTION TEKS & NAVIGASI CEPAT ========== */
+
+.admin-section{
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  padding: 14px 16px 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 3px 8px rgba(15, 23, 42, .03);
+}
+
+.admin-section-title{
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.admin-section-text{
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #6b7280;
+}
+
+/* Link cepat (kelola produk, banner, dll) */
+.admin-quick-links{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.admin-quick-link{
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  color: #1e293b;
+  background: #f9fafb;
+  transition: background .15s ease, border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+
+.admin-quick-link::before{
+  content: "↗";
+  margin-right: 6px;
+  font-size: 12px;
+}
+
+.admin-quick-link:hover{
+  background: #eef2ff;
+  border-color: #7c3aed;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, .18);
+  transform: translateY(-1px);
+}
+
+/* ========== RESPONSIVE ========== */
+
+@media (max-width: 900px){
+  .admin-grid{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-page-header{
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 600px){
+  .admin-shell{
+    padding: 0 10px 32px;
+  }
+
+  .admin-grid{
+    grid-template-columns: 1fr;
+  }
+}
