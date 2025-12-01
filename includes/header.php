@@ -1,6 +1,6 @@
 <?php
 // ===============================================================
-// SellExa – Header (Admin & User Role Based Navigation)
+// NearBuy – Header (Role Based Navigation: guest, pengguna, seller, admin)
 // ===============================================================
 declare(strict_types=1);
 
@@ -15,15 +15,14 @@ $user = $_SESSION['user'] ?? null;
 // default role = guest
 $role = 'guest';
 
-// hanya gunakan role jika benar-benar valid
+// gunakan role jika valid
 if ($user && is_array($user)) {
-    if (isset($user['role']) && in_array($user['role'], ['pengguna','admin'], true)) {
+    if (isset($user['role']) && in_array($user['role'], ['pengguna', 'admin', 'seller'], true)) {
         $role = $user['role'];
     }
 }
 
-// OPTIONAL: beberapa halaman boleh paksa tampil sebagai guest
-// misal di index.php: $FORCE_GUEST_HEADER = true;
+// OPTIONAL: beberapa halaman bisa paksa header guest
 if (isset($FORCE_GUEST_HEADER) && $FORCE_GUEST_HEADER === true) {
     $role = 'guest';
 }
@@ -34,26 +33,26 @@ if (!isset($BASE) || !$BASE) {
     if (preg_match('~^(.*/public)~', $scriptDir, $m)) {
         $BASE = $m[1];
     } else {
-        $BASE = '/Marketplace_SellExa/public';
+        // fallback kalau deteksi gagal, sesuaikan dengan folder projekmu
+        $BASE = '/NearBuy-marketplace/public';
     }
 }
 $BASE = '/' . ltrim($BASE, '/');
 $BASE = rtrim($BASE, '/');
 
-// Escape helper
+// helper escape
 if (!function_exists('e')) {
     function e(string $s): string {
         return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
     }
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SellExa Marketplace</title>
+  <title>NearBuy Marketplace</title>
 
   <link rel="stylesheet" href="<?= e($BASE) ?>/style.css">
 
@@ -75,8 +74,9 @@ if (!function_exists('e')) {
 
     <!-- Logo -->
     <div class="logo">
-      <img src="<?= e($BASE) ?>/assets/logo-sellexa.png" class="logo-img" alt="Logo SellExa">
-      <span class="logo-text" style="font-weight:700;">SellExa</span>
+      <!-- sementara masih pakai file logo lama sampai kamu punya logo NearBuy sendiri -->
+      <img src="<?= e($BASE) ?>/assets/logo-sellexa.png" class="logo-img" alt="Logo NearBuy">
+      <span class="logo-text" style="font-weight:700;">NearBuy</span>
     </div>
 
     <!-- Hamburger Mobile -->
@@ -89,28 +89,34 @@ if (!function_exists('e')) {
 
       <?php if ($role === 'guest'): ?>
 
-          <a href="<?= e($BASE) ?>/index.php">Home</a>
-          <a href="<?= e($BASE) ?>/login.php">Daftar/Login</a>
-          <a href="<?= e($BASE) ?>/tentang.php">Tentang Kami</a>
-          <a href="<?= e($BASE) ?>/kontak.php">Kontak</a>
+        <a href="<?= e($BASE) ?>/index.php">Home</a>
+        <a href="<?= e($BASE) ?>/login.php">Daftar / Login</a>
+        <a href="<?= e($BASE) ?>/tentang.php">Tentang Kami</a>
+        <a href="<?= e($BASE) ?>/kontak.php">Kontak</a>
 
       <?php elseif ($role === 'pengguna'): ?>
 
-          <a href="<?= e($BASE) ?>/index.php">Home</a>
-          <a href="<?= e($BASE) ?>/wishlist.php">❤️ Wishlist</a>
-          <a href="<?= e($BASE) ?>/keranjang.php">🛒 Keranjang</a>
-          <a href="<?= e($BASE) ?>/profil.php">👤 Profil</a>
-          <a href="<?= e($BASE) ?>/logout.php" class="logout">Logout</a>
+        <a href="<?= e($BASE) ?>/index.php">Home</a>
+        <a href="<?= e($BASE) ?>/wishlist.php">❤️ Wishlist</a>
+        <a href="<?= e($BASE) ?>/keranjang.php">🛒 Keranjang</a>
+        <a href="<?= e($BASE) ?>/profil.php">👤 Profil</a>
+        <a href="<?= e($BASE) ?>/logout.php" class="logout">Logout</a>
+
+      <?php elseif ($role === 'seller'): ?>
+        <a href="<?= e($BASE) ?>/admin/index.php">📊 Dashboard Toko</a>
+        <a href="<?= e($BASE) ?>/admin/produk.php">📦 Produk</a>
+        <a href="<?= e($BASE) ?>/admin/pesanan.php">🧾 Pesanan</a>
+        <a href="<?= e($BASE) ?>/admin/promo.php">🏷 Promo</a>
+        <a href="<?= e($BASE) ?>/admin/voucher.php">🎟 Voucher</a>
+        <a href="<?= e($BASE) ?>/logout.php" class="logout">Logout</a>
 
       <?php elseif ($role === 'admin'): ?>
 
-          <!-- ADMIN HEADER -->
-          <a href="<?= e($BASE) ?>/admin/index.php">📊 Dashboard</a>
-          <a href="<?= e($BASE) ?>/admin/produk.php">📦 Kelola Produk</a>
-          <a href="<?= e($BASE) ?>/admin/pembeli.php">👥 Kelola Pembeli</a>
-          <a href="<?= e($BASE) ?>/admin/pesanan.php">🧾 Kelola Pesanan</a>
-          <a href="<?= e($BASE) ?>/admin/promo.php">🏷 Kelola Promo</a>
-          <a href="<?= e($BASE) ?>/logout.php" class="logout">Logout</a>
+        <a href="<?= e($BASE) ?>/admin/index.php">📊 Admin Dashboard</a>
+        <a href="<?= e($BASE) ?>/admin/pembeli.php">👥 Kelola Pengguna</a>
+        <a href="<?= e($BASE) ?>/admin/reporting_transaksi.php">📈 Laporan Transaksi</a>
+        <a href="<?= e($BASE) ?>/admin/banners.php">🖼 Kelola Banner</a>
+        <a href="<?= e($BASE) ?>/logout.php" class="logout">Logout</a>
 
       <?php endif; ?>
 
