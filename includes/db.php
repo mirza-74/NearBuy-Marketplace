@@ -1,13 +1,13 @@
 <?php
 // ===============================================================
-// SellExa – Database Connection (PDO)
+// NearBuy – Database Connection (PDO)
 // ===============================================================
 declare(strict_types=1);
 
 $DB_HOST = 'localhost';
-$DB_NAME = 'sellexa';
+$DB_NAME = 'nearbuy';   
 $DB_USER = 'root';
-$DB_PASS = ''; // ganti sesuai password MySQL kamu jika ada
+$DB_PASS = ''; 
 
 try {
     $pdo = new PDO(
