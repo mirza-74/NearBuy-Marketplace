@@ -1,50 +1,39 @@
 <?php
 // ===============================================================
-// NearBuy – Header (Role Based Navigation: guest, pengguna, seller, admin)
+// NearBuy – Header (auto BASE, role-based nav)
 // ===============================================================
 declare(strict_types=1);
 
-// pastikan session aktif
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// ambil user dari session (kalau ada)
-$user = $_SESSION['user'] ?? null;
-
-// default role = guest
-$role = 'guest';
-
-// gunakan role jika valid
-if ($user && is_array($user)) {
-    if (isset($user['role']) && in_array($user['role'], ['pengguna', 'admin', 'seller'], true)) {
-        $role = $user['role'];
-    }
-}
-
-// OPTIONAL: beberapa halaman bisa paksa header guest
-if (isset($FORCE_GUEST_HEADER) && $FORCE_GUEST_HEADER === true) {
-    $role = 'guest';
-}
-
-// BASE DETECTION
+// BASE: otomatis ambil folder tempat file public berada
 if (!isset($BASE) || !$BASE) {
-    $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
-    if (preg_match('~^(.*/public)~', $scriptDir, $m)) {
-        $BASE = $m[1];
-    } else {
-        // fallback kalau deteksi gagal, sesuaikan dengan folder projekmu
-        $BASE = '/NearBuy-marketplace/public';
-    }
+    // contoh hasil: /NearBuy-marketplace/public
+    $BASE = rtrim(str_replace('\\','/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/');
 }
-$BASE = '/' . ltrim($BASE, '/');
-$BASE = rtrim($BASE, '/');
 
 // helper escape
 if (!function_exists('e')) {
     function e(string $s): string {
         return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
     }
+}
+
+// ambil user dan role
+$user = $_SESSION['user'] ?? null;
+$role = 'guest';
+
+if ($user && is_array($user)) {
+    if (isset($user['role']) && in_array($user['role'], ['pengguna','admin','seller'], true)) {
+        $role = $user['role'];
+    }
+}
+
+// paksa guest kalau perlu
+if (isset($FORCE_GUEST_HEADER) && $FORCE_GUEST_HEADER === true) {
+    $role = 'guest';
 }
 ?>
 <!DOCTYPE html>
@@ -74,7 +63,6 @@ if (!function_exists('e')) {
 
     <!-- Logo -->
     <div class="logo">
-      <!-- sementara masih pakai file logo lama sampai kamu punya logo NearBuy sendiri -->
       <img src="<?= e($BASE) ?>/assets/logo-sellexa.png" class="logo-img" alt="Logo NearBuy">
       <span class="logo-text" style="font-weight:700;">NearBuy</span>
     </div>
@@ -103,19 +91,18 @@ if (!function_exists('e')) {
         <a href="<?= e($BASE) ?>/logout.php" class="logout">Logout</a>
 
       <?php elseif ($role === 'seller'): ?>
+
         <a href="<?= e($BASE) ?>/admin/index.php">📊 Dashboard Toko</a>
         <a href="<?= e($BASE) ?>/admin/produk.php">📦 Produk</a>
         <a href="<?= e($BASE) ?>/admin/pesanan.php">🧾 Pesanan</a>
         <a href="<?= e($BASE) ?>/admin/promo.php">🏷 Promo</a>
-        <a href="<?= e($BASE) ?>/admin/voucher.php">🎟 Voucher</a>
         <a href="<?= e($BASE) ?>/logout.php" class="logout">Logout</a>
 
       <?php elseif ($role === 'admin'): ?>
 
         <a href="<?= e($BASE) ?>/admin/index.php">📊 Admin Dashboard</a>
         <a href="<?= e($BASE) ?>/admin/pembeli.php">👥 Kelola Pengguna</a>
-        <a href="<?= e($BASE) ?>/admin/reporting_transaksi.php">📈 Laporan Transaksi</a>
-        <a href="<?= e($BASE) ?>/admin/banners.php">🖼 Kelola Banner</a>
+        <a href="<?= e($BASE) ?>/admin/reporting_transaksi.php">📈 Laporan</a>
         <a href="<?= e($BASE) ?>/logout.php" class="logout">Logout</a>
 
       <?php endif; ?>
