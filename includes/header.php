@@ -1,6 +1,6 @@
 <?php
 // ===============================================================
-// NearBuy – Header (auto BASE, role-based nav)
+// NearBuy – Header (auto BASE, role based nav)
 // ===============================================================
 declare(strict_types=1);
 
@@ -8,10 +8,16 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// BASE: otomatis ambil folder tempat file public berada
-if (!isset($BASE) || !$BASE) {
-    // contoh hasil: /NearBuy-marketplace/public
-    $BASE = rtrim(str_replace('\\','/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/');
+// BASE
+// Kalau file pemanggil sudah set $BASE, pakai itu
+// Kalau belum, deteksi dari SCRIPT_NAME (biasanya /NearBuy-marketplace/public)
+if (empty($BASE)) {
+    $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+    $BASE = rtrim($scriptDir, '/');
+    if ($BASE === '' || $BASE === '/') {
+        // fallback kalau aneh
+        $BASE = '/NearBuy-marketplace/public';
+    }
 }
 
 // helper escape
@@ -26,13 +32,13 @@ $user = $_SESSION['user'] ?? null;
 $role = 'guest';
 
 if ($user && is_array($user)) {
-    if (isset($user['role']) && in_array($user['role'], ['pengguna','admin','seller'], true)) {
+    if (isset($user['role']) && in_array($user['role'], ['pengguna', 'admin', 'seller'], true)) {
         $role = $user['role'];
     }
 }
 
 // paksa guest kalau perlu
-if (isset($FORCE_GUEST_HEADER) && $FORCE_GUEST_HEADER === true) {
+if (!empty($FORCE_GUEST_HEADER)) {
     $role = 'guest';
 }
 ?>
@@ -48,7 +54,7 @@ if (isset($FORCE_GUEST_HEADER) && $FORCE_GUEST_HEADER === true) {
   <?php
   if (!empty($EXTRA_CSS) && is_array($EXTRA_CSS)) {
       foreach ($EXTRA_CSS as $css) {
-          echo '<link rel="stylesheet" href="'.e($BASE).'/'.ltrim($css, '/').'">'."\n";
+          echo '<link rel="stylesheet" href="' . e($BASE) . '/' . ltrim($css, '/') . '">' . "\n";
       }
   }
   ?>
@@ -63,6 +69,7 @@ if (isset($FORCE_GUEST_HEADER) && $FORCE_GUEST_HEADER === true) {
 
     <!-- Logo -->
     <div class="logo">
+      <!-- kalau nanti sudah ada logo nearbuy, ganti nama file ini -->
       <img src="<?= e($BASE) ?>/assets/logo-sellexa.png" class="logo-img" alt="Logo NearBuy">
       <span class="logo-text" style="font-weight:700;">NearBuy</span>
     </div>
@@ -72,7 +79,7 @@ if (isset($FORCE_GUEST_HEADER) && $FORCE_GUEST_HEADER === true) {
       <span class="bar"></span><span class="bar"></span><span class="bar"></span>
     </button>
 
-    <!-- NAV ROLE-BASED -->
+    <!-- NAV ROLE BASED -->
     <nav class="nav-links" id="primary-nav">
 
       <?php if ($role === 'guest'): ?>
@@ -85,6 +92,7 @@ if (isset($FORCE_GUEST_HEADER) && $FORCE_GUEST_HEADER === true) {
       <?php elseif ($role === 'pengguna'): ?>
 
         <a href="<?= e($BASE) ?>/index.php">Home</a>
+        <a href="<?= e($BASE) ?>/set_lokasi.php">📍 Set Lokasi</a>
         <a href="<?= e($BASE) ?>/wishlist.php">❤️ Wishlist</a>
         <a href="<?= e($BASE) ?>/keranjang.php">🛒 Keranjang</a>
         <a href="<?= e($BASE) ?>/profil.php">👤 Profil</a>
@@ -92,14 +100,17 @@ if (isset($FORCE_GUEST_HEADER) && $FORCE_GUEST_HEADER === true) {
 
       <?php elseif ($role === 'seller'): ?>
 
-        <a href="<?= e($BASE) ?>/admin/index.php">📊 Dashboard Toko</a>
-        <a href="<?= e($BASE) ?>/admin/produk.php">📦 Produk</a>
-        <a href="<?= e($BASE) ?>/admin/pesanan.php">🧾 Pesanan</a>
-        <a href="<?= e($BASE) ?>/admin/promo.php">🏷 Promo</a>
+        <!-- Menu khusus seller NearBuy, bukan admin -->
+        <a href="<?= e($BASE) ?>/seller/index.php">📊 Dashboard Toko</a>
+        <a href="<?= e($BASE) ?>/seller/produk.php">📦 Kelola Produk</a>
+        <a href="<?= e($BASE) ?>/seller/pesanan.php">🧾 Kelola Pesanan</a>
+        <a href="<?= e($BASE) ?>/seller/promo.php">🏷 Kelola Promo</a>
+        <a href="<?= e($BASE) ?>/seller/lokasi.php">📍 Lokasi Toko</a>
         <a href="<?= e($BASE) ?>/logout.php" class="logout">Logout</a>
 
       <?php elseif ($role === 'admin'): ?>
 
+        <!-- Admin bener bener buat kelola sistem NearBuy -->
         <a href="<?= e($BASE) ?>/admin/index.php">📊 Admin Dashboard</a>
         <a href="<?= e($BASE) ?>/admin/pembeli.php">👥 Kelola Pengguna</a>
         <a href="<?= e($BASE) ?>/admin/reporting_transaksi.php">📈 Laporan</a>
