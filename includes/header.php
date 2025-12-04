@@ -1,6 +1,6 @@
 <?php
 // ===============================================================
-// NearBuy – Header (auto BASE, role based nav)
+// NearBuy – Header (auto BASE based nav)
 // ===============================================================
 declare(strict_types=1);
 
@@ -9,13 +9,10 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // BASE
-// Kalau file pemanggil sudah set $BASE, pakai itu
-// Kalau belum, deteksi dari SCRIPT_NAME (biasanya /NearBuy-marketplace/public)
 if (empty($BASE)) {
     $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
     $BASE = rtrim($scriptDir, '/');
     if ($BASE === '' || $BASE === '/') {
-        // fallback kalau aneh
         $BASE = '/NearBuy-marketplace/public';
     }
 }
@@ -69,7 +66,6 @@ if (!empty($FORCE_GUEST_HEADER)) {
 
     <!-- Logo -->
     <div class="logo">
-      <!-- kalau nanti sudah ada logo nearbuy, ganti nama file ini -->
       <img src="<?= e($BASE) ?>/assets/logo-sellexa.png" class="logo-img" alt="Logo NearBuy">
       <span class="logo-text" style="font-weight:700;">NearBuy</span>
     </div>
@@ -93,14 +89,15 @@ if (!empty($FORCE_GUEST_HEADER)) {
 
         <a href="<?= e($BASE) ?>/index.php">Home</a>
         <a href="<?= e($BASE) ?>/set_lokasi.php">📍 Set Lokasi</a>
-        <a href="<?= e($BASE) ?>/wishlist.php">❤️ Wishlist</a>
+        <!-- DULU: Wishlist, SEKARANG: Buka Toko -->
+        <a href="<?= e($BASE) ?>/seller/toko.php">🏪 Buka Toko</a>
         <a href="<?= e($BASE) ?>/keranjang.php">🛒 Keranjang</a>
         <a href="<?= e($BASE) ?>/profil.php">👤 Profil</a>
         <a href="<?= e($BASE) ?>/logout.php" class="logout">Logout</a>
 
       <?php elseif ($role === 'seller'): ?>
 
-        <!-- Menu khusus seller NearBuy, bukan admin -->
+        <!-- Menu khusus seller NearBuy -->
         <a href="<?= e($BASE) ?>/seller/index.php">📊 Dashboard Toko</a>
         <a href="<?= e($BASE) ?>/seller/produk.php">📦 Kelola Produk</a>
         <a href="<?= e($BASE) ?>/seller/pesanan.php">🧾 Kelola Pesanan</a>
@@ -110,7 +107,7 @@ if (!empty($FORCE_GUEST_HEADER)) {
 
       <?php elseif ($role === 'admin'): ?>
 
-        <!-- Admin bener bener buat kelola sistem NearBuy -->
+        <!-- Admin khusus sistem NearBuy -->
         <a href="<?= e($BASE) ?>/admin/index.php">📊 Admin Dashboard</a>
         <a href="<?= e($BASE) ?>/admin/pembeli.php">👥 Kelola Pengguna</a>
         <a href="<?= e($BASE) ?>/admin/reporting_transaksi.php">📈 Laporan</a>
