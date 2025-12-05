@@ -26,37 +26,76 @@ if (!empty($_SESSION['user'])) {
 
 // Proses Login
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = strtolower(trim($_POST['email'] ?? ''));
-    $pass  = trim($_POST['password'] ?? '');
+    $email = strtolower(trim((string)($_POST['email'] ?? '')));
+    $pass  = trim((string)($_POST['password'] ?? ''));
 
     if ($email === '' || $pass === '') {
         $error = 'Email dan kata sandi wajib diisi.';
     } else {
-        // FIX: cocok dengan database kamu
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? LIMIT 1");
-        $stmt->execute([$email]);
-        $u = $stmt->fetch();
-
-        if ($u && password_verify($pass, $u['password'])) {
-            session_regenerate_id(true);
-            unset($u['password']);
-            $_SESSION['user'] = $u;
-
-            if ($u['role'] === 'admin') {
-                header("Location: $BASE/admin/index.php");
-            } elseif ($u['role'] === 'seller') {
-                header("Location: $BASE/seller/index.php");
-            } else {
-                header("Location: $BASE/index.php");
+        // --- BLOK KODE LOGIN YANG BENAR DAN LENGKAP DIMULAI DI SINI ---
+        try {
+            if (!isset($pdo) || !($pdo instanceof PDO)) {
+                throw new RuntimeException('Koneksi database tidak tersedia.');
             }
-            exit;
-        } else {
-            $error = 'Email atau kata sandi salah.';
+
+            $stmt = $pdo->prepare("
+                SELECT id, full_name, email, password_hash, role, is_active
+                FROM users
+                WHERE email = ?
+                LIMIT 1
+            ");
+            $stmt->execute([$email]);
+            $u = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            $loginOk = false;
+
+            if ($u && (int)$u['is_active'] === 1) {
+                $hash = $u['password_hash'];
+
+                // Pastikan bertipe string dulu
+                if (is_string($hash) && $hash !== '') {
+                    // Utama: verifikasi hash yang benar
+                    if (password_verify($pass, $hash)) {
+                        $loginOk = true;
+                    } else {
+                        // BACKWARD COMPATIBLE:
+                        // kalau ada user lama yang password_hash-nya masih plain text
+                        if ($pass === $hash) {
+                            $loginOk = true;
+                        }
+                    }
+                }
+            }
+
+            if ($loginOk) {
+                session_regenerate_id(true);
+
+                // Simpan data user di session (tanpa hash)
+                unset($u['password_hash']);
+                $_SESSION['user'] = $u;
+
+                if ($u['role'] === 'admin') {
+                    header("Location: $BASE/admin/index.php");
+                } elseif ($u['role'] === 'seller') {
+                    header("Location: $BASE/seller/index.php");
+                } else {
+                    header("Location: $BASE/index.php");
+                }
+                exit;
+            } else {
+                $error = 'Email atau kata sandi salah.';
+            }
+
+        } catch (Throwable $e) {
+            $error = 'Terjadi kesalahan saat memproses login.';
+            // kalau mau debugging:
+            // $error .= ' [DEBUG: ' . $e->getMessage() . ']';
         }
+        // --- BLOK KODE LOGIN YANG BENAR DAN LENGKAP BERAKHIR DI SINI ---
     }
 }
 
-function h($s){ return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
+function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -70,19 +109,17 @@ function h($s){ return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 
 <div class="container">
 
-    <!-- LEFT PANEL -->
     <div class="left-panel">
         <img src="<?= h($BASE) ?>/assets/logo_nearbuy.png" alt="NearBuy" class="logo">
         <p class="slogan">“Menghubungkan pelanggan dengan produk terdekat.”</p>
     </div>
 
-    <!-- RIGHT PANEL -->
     <div class="right-panel">
         <div class="form-container">
             <h2>Login Akun NearBuy</h2>
 
             <?php if ($error): ?>
-                <div class="error" role="alert"><?= h($error) ?></div>
+                <div class="alert alert-error" role="alert"><?= h($error) ?></div>
             <?php endif; ?>
 
             <form action="" method="POST" autocomplete="off" novalidate>

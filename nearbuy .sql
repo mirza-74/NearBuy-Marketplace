@@ -1,8 +1,21 @@
-
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: Dec 04, 2025 at 04:53 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
 
 --
 -- Database: `nearbuy`
@@ -354,19 +367,32 @@ CREATE TABLE `transactions` (
 
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
-  `nama` varchar(100) NOT NULL,
+  `full_name` varchar(120) NOT NULL,
   `email` varchar(100) NOT NULL,
-  `password` varchar(255) NOT NULL,
+  `phone` varchar(30) DEFAULT NULL,
+  `gender` enum('male','female','other') DEFAULT NULL,
+  `birth_date` date DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `city` varchar(120) DEFAULT NULL,
+  `province` varchar(120) DEFAULT NULL,
+  `postal_code` varchar(20) DEFAULT NULL,
+  `password_hash` varchar(255) NOT NULL,
   `role` enum('admin','pengguna','seller') NOT NULL DEFAULT 'pengguna',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
+  `points` int(11) NOT NULL DEFAULT 0,
+  `latitude` decimal(10,7) DEFAULT NULL,
+  `longitude` decimal(10,7) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `nama`, `email`, `password`, `role`, `created_at`) VALUES
-(1, 'Administrator', 'admin@nearbuy.com', 'admin123', 'admin', '2025-12-01 17:10:04');
+INSERT INTO `users` (`id`, `full_name`, `email`, `phone`, `gender`, `birth_date`, `address`, `city`, `province`, `postal_code`, `password_hash`, `role`, `is_active`, `created_at`, `updated_at`, `points`, `latitude`, `longitude`) VALUES
+(1, 'Administrator', 'admin@nearbuy.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'admin123', 'admin', 1, '2025-12-01 17:10:04', NULL, 0, NULL, NULL),
+(2, 'Mirza', 'mirza123@gmail.com', '0834567878', 'female', NULL, NULL, 'Pangkalpinang', NULL, NULL, '$2y$10$lRS6jJL8t/ItRYrbkZf0Vufgfk68BXsw1oTz9DixxQr3c8lSME5r6', 'pengguna', 1, '2025-12-03 14:43:33', NULL, 0, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -389,39 +415,6 @@ INSERT INTO `user_preferences` (`user_id`, `category_id`) VALUES
 (3, 1),
 (3, 10),
 (3, 11);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `vouchers`
---
-
-CREATE TABLE `vouchers` (
-  `id` int(10) UNSIGNED NOT NULL,
-  `code` varchar(32) NOT NULL,
-  `title` varchar(120) NOT NULL,
-  `description` varchar(255) DEFAULT NULL,
-  `min_points` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `discount_type` enum('percent','nominal','free_shipping') DEFAULT 'percent',
-  `discount_value` int(11) DEFAULT 0,
-  `min_transaction` int(11) DEFAULT 0,
-  `max_discount` int(11) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `voucher_claims`
---
-
-CREATE TABLE `voucher_claims` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED NOT NULL,
-  `voucher_id` int(10) UNSIGNED NOT NULL,
-  `claimed_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -559,7 +552,7 @@ ALTER TABLE `transactions`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Constraints for dumped tables
