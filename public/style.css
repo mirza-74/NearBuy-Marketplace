@@ -1084,46 +1084,6 @@ body{
 .social-links a img {
   filter: invert(0%) !important; /* icon jadi hitam / gelap */
 }
-.search-bar {
-  position: relative;
-  width: 520px;
-  max-width: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.search-bar .search-icon {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  opacity: 0.7;
-  pointer-events: none;
-}
-
-.search-bar input {
-  flex: 1;
-  padding: 12px 16px 12px 45px; /* ruang icon */
-  border-radius: 30px 0 0 30px;
-  border: 1px solid #d0d7e2;
-  font-size: 15px;
-  outline: none;
-}
-
-.btn-search {
-  padding: 12px 20px;
-  border: none;
-  background: #ff5722;
-  color: white;
-  font-weight: bold;
-  border-radius: 0 30px 30px 0;
-  cursor: pointer;
-  transition: .2s;
-}
-
-.btn-search:hover {
-  background: #e64a19;
-}
 
 
 /* =========================================================

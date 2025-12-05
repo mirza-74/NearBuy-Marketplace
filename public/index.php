@@ -287,7 +287,10 @@ try {
           value="<?= e($searchQ) ?>"
           maxlength="80"
           placeholder="Cari kebutuhan harian di sekitarmu">
-        <button type="submit">Cari</button>
+        <button type="submit">
+  <i class="fa fa-search"></i>
+</button>
+
       </form>
     </section>
     
