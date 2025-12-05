@@ -1092,3 +1092,77 @@ body{
 
 /* ... (SEMUA BAGIAN KODE KAMU YANG LAIN DIPERTAHANKAN TANPA DIUBAH) ... */
 
+/* ===== Modal Notifikasi Sukses ===== */
+.modal-mask {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);   /* background gelap transparan */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.modal-card {
+    width: min(90vw, 420px);
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 26px 22px 22px;
+    box-shadow: 0 12px 35px rgba(0,0,0,0.18);
+    text-align: center;
+    animation: fadeIn 0.35s ease-out;
+}
+
+.modal-card h3 {
+    margin-bottom: 8px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #0d223f;
+}
+
+.modal-card p {
+    font-size: 14px;
+    color: #334155;
+    margin-bottom: 18px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Tombol di dalam modal */
+.btn {
+    display: inline-block;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.btn-primary {
+    background: #1d75ff;
+    color: #ffffff;
+}
+
+.btn-secondary {
+    background: #e5f0ff;
+    color: #0d223f;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+/* Kalau mau animasi masuk halus, pakai yang sama dengan form */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
