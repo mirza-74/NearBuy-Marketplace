@@ -1,20 +1,13 @@
 <?php
 // ===============================================================
 // NearBuy – Halaman Toko Saya
-// Jika sudah punya toko tampilkan ringkasan toko
-// Jika belum punya toko tampilkan ajakan registrasi
 // ===============================================================
 declare(strict_types=1);
 
 require_once __DIR__ . '/../../includes/session.php';
 require_once __DIR__ . '/../../includes/db.php';
 
-// deteksi BASE otomatis dari folder public
-$scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
-$BASE = rtrim($scriptDir, '/');
-if ($BASE === '' || $BASE === '/') {
-    $BASE = '/NearBuy-marketplace/public';
-}
+$BASE = '/NearBuy-Marketplace/public';
 
 // helper escape
 if (!function_exists('e')) {
@@ -33,21 +26,21 @@ if (!$user || empty($user['id'])) {
 $userId = (int)$user['id'];
 
 // ambil toko milik user
-$shop = null;
+$shop    = null;
 $hasShop = false;
 
 try {
     $stmt = $pdo->prepare("
-        SELECT id, shop_id, name, address, latitude, longitude, is_active, created_at
+        SELECT id, name, address, latitude, longitude, is_active, created_at
         FROM shops
         WHERE user_id = ?
         LIMIT 1
     ");
     $stmt->execute([$userId]);
-    $shop = $stmt->fetch(PDO::FETCH_ASSOC);
+    $shop    = $stmt->fetch(PDO::FETCH_ASSOC);
     $hasShop = $shop ? true : false;
 } catch (Throwable $e) {
-    $shop = null;
+    $shop    = null;
     $hasShop = false;
 }
 
@@ -58,92 +51,80 @@ $EXTRA_CSS = ['seller/style-toko.css'];
 require_once __DIR__ . '/../../includes/header.php';
 ?>
 
-<div class="toko-shell">
+<div class="nb-shell">
 
   <?php if ($hasShop): ?>
-    <!-- Jika sudah punya toko -->
-    <section class="toko-card toko-card-main">
-      <div class="toko-headline">
-        <h1>Toko Saya</h1>
-        <p>Kelola toko NearBuy milik kamu dari satu halaman ini.</p>
+    <!-- ======================= -->
+    <!-- USER SUDAH PUNYA TOKO   -->
+    <!-- ======================= -->
+
+    <!-- Kartu utama kiri -->
+    <section class="nb-card nb-main-card">
+      <h1 class="nb-title">Toko Saya</h1>
+      <p class="nb-sub">
+        Kelola toko NearBuy milik kamu dari satu halaman ini. Pastikan alamat dan lokasi sudah benar
+        agar pembeli di sekitar kamu mudah menemukan toko.
+      </p>
+
+      <div class="nb-field">
+        <div class="nb-label">Nama Toko</div>
+        <div class="nb-value"><?= e($shop['name'] ?? 'Toko Tanpa Nama') ?></div>
       </div>
 
-      <div class="toko-info-grid">
-        <div class="toko-info-block">
-          <div class="label">Nama Toko</div>
-          <div class="value"><?= e($shop['name'] ?? 'Toko Tanpa Nama') ?></div>
-        </div>
-
-        <div class="toko-info-block">
-          <div class="label">ID Toko</div>
-          <div class="value mono">
-            <?= e($shop['shop_id'] ?? ('NB-' . (int)$shop['id'])) ?>
-          </div>
-        </div>
-
-        <div class="toko-info-block">
-          <div class="label">Status</div>
-          <div class="value">
-            <?php if (!empty($shop['is_active'])): ?>
-              <span class="badge badge-on">Aktif</span>
-            <?php else: ?>
-              <span class="badge badge-off">Menunggu persetujuan admin</span>
-            <?php endif; ?>
-          </div>
-        </div>
-
-        <div class="toko-info-block full">
-          <div class="label">Alamat Toko</div>
-          <div class="value">
-            <?= e($shop['address'] ?: 'Alamat belum diisi') ?>
-          </div>
-        </div>
-
-        <div class="toko-info-block">
-          <div class="label">Latitude</div>
-          <div class="value mono">
-            <?= $shop['latitude'] !== null ? e((string)$shop['latitude']) : 'Belum diatur' ?>
-          </div>
-        </div>
-
-        <div class="toko-info-block">
-          <div class="label">Longitude</div>
-          <div class="value mono">
-            <?= $shop['longitude'] !== null ? e((string)$shop['longitude']) : 'Belum diatur' ?>
-          </div>
+      <div class="nb-field">
+        <div class="nb-label">ID Toko</div>
+        <div class="nb-value nb-pill">
+          NB-<?= e((string)$shop['id']) ?>
         </div>
       </div>
 
-      <div class="toko-actions">
-        <a class="btn primary" href="<?= e($BASE) ?>/seller/index.php">
-          Masuk Dashboard Toko
+      <div class="nb-field">
+        <div class="nb-label">Status</div>
+        <div class="nb-value">
+          <?php if (!empty($shop['is_active'])): ?>
+            <span class="nb-pill">Aktif</span>
+          <?php else: ?>
+            <span class="nb-pill inactive">Menunggu persetujuan admin</span>
+          <?php endif; ?>
+        </div>
+      </div>
+
+      <div class="nb-field">
+        <div class="nb-label">Alamat Toko</div>
+        <div class="nb-value">
+          <?= e($shop['address'] ?: 'Alamat toko belum diisi') ?>
+        </div>
+      </div>
+
+      <div class="nb-actions nb-actions-top">
+        <a class="nb-btn nb-btn-primary" href="<?= e($BASE) ?>/seller/index.php">
+          Masuk Dashboard
         </a>
-        <a class="btn" href="<?= e($BASE) ?>/seller/produk.php">
+        <a class="nb-btn" href="<?= e($BASE) ?>/seller/produk.php">
           Kelola Produk
         </a>
-        <a class="btn" href="<?= e($BASE) ?>/seller/lokasi.php">
+        <a class="nb-btn nb-btn-secondary" href="<?= e($BASE) ?>/seller/lokasi.php">
           Atur Lokasi Toko
         </a>
       </div>
     </section>
 
-    <!-- Preview produk toko di bawah -->
-    <section class="toko-card">
-      <h2>Preview Produk di NearBuy</h2>
-      <p class="toko-subtext">
-        Ini contoh tampilan produk kamu di halaman pembeli.
+    <!-- Kartu samping kanan – preview produk -->
+    <aside class="nb-card nb-side-card">
+      <h2 class="nb-side-title">Preview Produk</h2>
+      <p class="nb-sub nb-sub-small">
+        Contoh tampilan produk kamu di halaman pembeli NearBuy.
       </p>
 
       <?php
-      // ambil beberapa produk milik toko ini untuk preview
       $preview = [];
       try {
           $stmtP = $pdo->prepare("
-              SELECT id, title, price, compare_price, main_image, slug
+              SELECT id, title, price, compare_price, main_image
               FROM products
               WHERE shop_id = ?
               ORDER BY created_at DESC
-              LIMIT 8
+              LIMIT 6
           ");
           $stmtP->execute([$shop['id']]);
           $preview = $stmtP->fetchAll(PDO::FETCH_ASSOC);
@@ -153,61 +134,95 @@ require_once __DIR__ . '/../../includes/header.php';
       ?>
 
       <?php if ($preview): ?>
-        <div class="toko-product-grid">
+        <div class="nb-products-grid">
           <?php foreach ($preview as $p): ?>
             <?php
               $img = $p['main_image']
                      ? $BASE . '/uploads/' . ltrim($p['main_image'], '/')
-                     : 'https://via.placeholder.com/120?text=No+Img';
+                     : 'https://via.placeholder.com/160x120?text=No+Image';
+
               $hasPromo = !is_null($p['compare_price']) && (float)$p['compare_price'] > (float)$p['price'];
             ?>
-            <div class="toko-product-card">
-              <img src="<?= e($img) ?>" alt="<?= e($p['title']) ?>" class="toko-product-img">
-              <div class="toko-product-title"><?= e($p['title']) ?></div>
-              <div class="toko-product-price">
+            <div class="nb-prod-card">
+              <div class="nb-prod-img-wrap">
+                <img src="<?= e($img) ?>" alt="<?= e($p['title']) ?>">
+              </div>
+              <div class="nb-prod-body">
+                <div class="nb-prod-title"><?= e($p['title']) ?></div>
                 <?php if ($hasPromo): ?>
-                  <span class="old">Rp<?= number_format((float)$p['compare_price'], 0, ',', '.') ?></span>
+                  <div class="nb-prod-compare">
+                    Rp<?= number_format((float)$p['compare_price'], 0, ',', '.') ?>
+                  </div>
                 <?php endif; ?>
-                <span class="new">Rp<?= number_format((float)$p['price'], 0, ',', '.') ?></span>
+                <div class="nb-prod-price">
+                  Rp<?= number_format((float)$p['price'], 0, ',', '.') ?>
+                </div>
               </div>
             </div>
           <?php endforeach; ?>
         </div>
       <?php else: ?>
-        <p class="toko-subtext">
-          Belum ada produk. Tambahkan produk di menu Kelola Produk.
+        <p class="nb-empty">
+          Belum ada produk. Tambahkan produk di menu <b>Kelola Produk</b>.
         </p>
       <?php endif; ?>
-    </section>
+    </aside>
 
   <?php else: ?>
-    <!-- Jika belum punya toko -->
-    <section class="toko-card toko-empty">
-      <h1>Buka Toko di NearBuy</h1>
-      <p class="toko-lead">
-        Kamu belum punya toko di NearBuy.
-        Buka toko agar produk kamu bisa ditemukan pembeli di sekitar lokasi kamu.
+    <!-- ======================= -->
+    <!-- USER BELUM PUNYA TOKO   -->
+    <!-- ======================= -->
+
+    <!-- Kartu ajakan kiri -->
+    <section class="nb-card nb-main-card">
+      <h1 class="nb-title">Buka Toko di NearBuy</h1>
+      <p class="nb-sub">
+        Kamu belum memiliki toko. Daftarkan toko sekarang dan jangkau pembeli terdekat di sekitar domisili kamu.
       </p>
 
-      <ol class="toko-steps">
-        <li>Baca dulu peraturan dan panduan buka toko.</li>
-        <li>Daftarkan toko dengan ID toko, nama toko, dan kata sandi khusus.</li>
-        <li>Tunggu persetujuan admin. Setelah disetujui toko kamu akan aktif.</li>
-      </ol>
+      <p class="nb-sub nb-sub-small">
+        Dengan toko NearBuy, produk kamu akan muncul di rekomendasi pembeli yang lokasinya paling dekat dengan toko kamu.
+      </p>
 
-      <div class="toko-actions">
-        <a class="btn" href="<?= e($BASE) ?>/seller/peraturan_toko.php">
-          Baca peraturan buka toko
+      <div class="nb-field">
+        <div class="nb-label">Langkah buka toko:</div>
+        <ol class="nb-step-list">
+          <li>Baca peraturan dan panduan buka toko.</li>
+          <li>Isi data toko, alamat, dan lokasi di peta.</li>
+          <li>Tunggu persetujuan admin sebelum toko aktif.</li>
+        </ol>
+      </div>
+
+      <div class="nb-actions nb-actions-top">
+        <a class="nb-btn nb-btn-secondary" href="<?= e($BASE) ?>/seller/peraturan_toko.php">
+          Baca Peraturan Buka Toko
         </a>
-        <a class="btn primary" href="<?= e($BASE) ?>/seller/register_toko.php">
-          Buka toko sekarang
+        <a class="nb-btn nb-btn-primary" href="<?= e($BASE) ?>/seller/register_toko.php">
+          Buka Toko Sekarang
         </a>
       </div>
 
-      <p class="toko-note">
-        ID toko berfungsi seperti email toko kamu. ID ini akan dipakai saat login ke dashboard seller.
+      <p class="nb-sub nb-sub-small" style="margin-top: 10px;">
+        ID Toko berfungsi seperti email toko kamu dan akan dipakai saat login ke dashboard seller.
       </p>
     </section>
+
+    <!-- Kartu info kanan -->
+    <aside class="nb-card nb-side-card">
+      <h2 class="nb-side-title">Kenapa buka toko di NearBuy?</h2>
+      <p class="nb-sub nb-sub-small">
+        • Jangkau pelanggan di sekitar lokasi toko kamu secara otomatis.<br>
+        • Pengelolaan produk dan pesanan dari satu dashboard seller.<br>
+        • Cocok untuk warung, minimarket, dan usaha rumahan.
+      </p>
+
+      <div class="nb-actions">
+        <a class="nb-btn" href="<?= e($BASE) ?>/profil.php">
+          Lengkapi Profil Pembeli
+        </a>
+      </div>
+    </aside>
+
   <?php endif; ?>
 
 </div>
