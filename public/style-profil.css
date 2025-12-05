@@ -1,5 +1,5 @@
 /* =========================================================
-   SellExa – Profil / Akun Styles
+   NEARBUY– Profil / Akun Styles
    ========================================================= */
 
 :root{
@@ -167,7 +167,7 @@
   border-radius:12px;
   text-decoration:none;
   background:#f9fafb;
-  color:#0f172a;
+  color:#688ce0;
   font-size:.78rem;
   transition:background .15s ease, transform .15s ease, box-shadow .15s ease;
 }

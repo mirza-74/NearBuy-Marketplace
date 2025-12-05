@@ -1,167 +1,193 @@
-/* ===== Global ===== */
+/* ===== Global Reset ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ===== Background ===== */
 body {
-  margin: 0;
-  font-family: 'Poppins', sans-serif;
-  background-color: #fff;
+    background: linear-gradient(145deg, hsl(209,100%,82%), #d5e9ff);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
 }
 
-/* ===== Layout container ===== */
-.auth-container {
-  display: flex;
-  min-height: 100vh;
+/* ===== Main Container ===== */
+.container {
+    width: 90%;
+    max-width: 1000px;
+    display: flex;
+    border-radius: 20px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(14px);
+    box-shadow: 0px 10px 35px rgba(0,0,0,0.15);
 }
 
-/* ===== Left panel (gradient) ===== */
-.auth-left {
-  flex: 1;
-  background: linear-gradient(135deg, #4263eb, #7b2ff7);
-  color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 40px;
-  box-sizing: border-box;
+/* ===== Left Panel ===== */
+.left-panel {
+    flex: 1;
+    background: linear-gradient(145deg, hsl(209,100%,82%), #c8e3ff);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 25px; /* DIPERKECIL SUPAYA SEIMBANG */
+    text-align: center;
 }
 
-.auth-left .logo-auth {
-  width: 90px;
-  margin-bottom: 15px;
+.left-panel img.logo {
+    width: 200px;
+    margin-bottom: 25px;
 }
 
-/* ===== Right panel (form) ===== */
-.auth-right {
-  flex: 1;
-  background-color: #fff;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;      /* form mulai dari atas, bukan center */
-  justify-content: flex-start;
-  padding: 40px 60px;
-  box-sizing: border-box;
-  overflow-y: auto;             /* kalau form tinggi, bisa discroll */
+.left-panel .slogan {
+    font-size: 20px;
+    font-weight: 600;
+    color: #03060c;
+    width: 80%;
+    line-height: 1.4;.left-panel .slogan {
+    text-align: left;
+    width: 85%;   /* supaya tidak terlalu mepet */
 }
 
-/* Biar form nggak terlalu lebar di layar besar */
-.form-auth {
-  width: 100%;
-  max-width: 480px;
 }
 
-/* ===== Form elements ===== */
-.form-auth label {
-  display: block;
-  margin-top: 10px;
-  margin-bottom: 6px;
-  font-weight: 600;
-  color: #1e293b;
+/* ===== Right Panel ===== */
+.right-panel {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px; /* DIPERKECIL SUPAYA FORM TIDAK TERDORONG */
 }
 
-.form-auth input,
-.form-auth select {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  font-size: 15px;
-  box-sizing: border-box;
+/* ===== Form Box ===== */
+.form-container {
+    width: 100%;
+    max-width: 380px;
+    padding: 35px;
+    background: rgba(255,255,255,0.45);
+    border-radius: 40px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0px 6px 25px rgba(0,0,0,0.12);
+    animation: fadeIn 0.6s ease-in-out;
+     transform: translateX(15px); 
 }
 
-button {
-  width: 100%;
-  background-color: #7b2ff7;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 10px;
-  margin-top: 18px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 15px;
+.form-container h2 {
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 25px;
+    color: #0d223f;
 }
 
-button:hover {
-  background-color: #5b19d4;
+/* Inputs */
+.form-container input {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 16px;
+    border: 1.6px solid #8bbced;
+    border-radius: 14px;
+    background: #fafafa;
+    font-size: 15px;
 }
 
-/* ===== Misc ===== */
-.error {
-  background-color: #ffe5e5;
-  color: #d8000c;
-  padding: 10px 12px;
-  border-radius: 8px;
-  margin-bottom: 10px;
+.form-container input:focus {
+    border-color: #1d75ff;
+    background: #fff;
+    box-shadow: 0px 0px 8px rgba(29,117,255,0.25);
+    outline: none;
 }
 
-.success {
-  background-color: #e6ffed;
-  color: #088a29;
-  padding: 10px 12px;
-  border-radius: 8px;
-  margin-bottom: 10px;
+/* Button */
+.form-container button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 16px;
+    background: #1d75ff;
+    color: #fff;
+    font-size: 17px;
+    cursor: pointer;
 }
 
-.auth-links {
-  margin-top: 12px;
-  font-size: 14px;
+.form-container button:hover {
+    background: #155ace;
 }
 
-.auth-links a {
-  color: #7b2ff7;
-  text-decoration: none;
+/* Bottom text */
+.register-text {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 14px;
 }
 
-.auth-links a:hover {
-  text-decoration: underline;
-}
-
-/* ===== Social (kalau dipakai) ===== */
-.auth-social-text {
-  text-align: center;
-  margin-top: 15px;
-}
-
-.social-login {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-}
-
-.btn-social {
-  width: 40px;
-  height: 40px;
-  border: 1px solid #ccc;
-  border-radius: 50%;
-  background: white;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 18px;
-}
-
-.fb {
-  color: #3b5998;
-}
-
-.google {
-  color: #db4437;
+.register-text a {
+    color: #1d75ff;
+    font-weight: 600;
 }
 
 /* ===== Responsive ===== */
-@media (max-width: 768px) {
-  .auth-container {
+@media (max-width: 850px) {
+    .container {
+        flex-direction: column;
+        max-width: 450px;
+    }
+
+    .left-panel {
+        padding: 40px 20px;
+    }
+
+    .form-container {
+        margin-top: 10px;
+        border-radius: 25px;
+    }
+}
+/* ===== Two Column Layout for Gender & Age ===== */
+.two-columns {
+    display: flex;
+    gap: 18px;
+    width: 100%;
+    margin-bottom: 18px;
+}
+
+.two-columns .input-box {
+    flex: 1;
+    display: flex;
     flex-direction: column;
-  }
+}
 
-  .auth-left {
-    display: none;
-  }
+.two-columns label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #0d223f;
+}
 
-  .auth-right {
-    padding: 24px 20px;
-  }
+.two-columns input,
+.two-columns select {
+    padding: 14px;
+    border: 1.6px solid #8bbced;
+    border-radius: 14px;
+    background: #fafafa;
+    font-size: 15px;
+    transition: .25s ease;
+}
 
-  .form-auth {
-    max-width: 100%;
-  }
+/* Responsif: jadi 1 kolom di HP */
+@media (max-width: 650px) {
+    .two-columns {
+        flex-direction: column;
+    }
+}
+
+/* Fade animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }

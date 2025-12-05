@@ -1,5 +1,5 @@
 /* =========================================================
-   SellExa — Global Styles
+   NeareBuy
    (match logo gradient, keep original selector order/placement)
    ========================================================= */
 :root{
@@ -32,7 +32,9 @@ body{
    ========================================================= */
 .main-header{
   /* ganti jadi gradient sesuai logo */
+  
   background:linear-gradient(135deg,var(--brand-a),var(--brand-b));
+
   color:#fff;
   position:sticky;
   top:0;
@@ -74,32 +76,49 @@ body{
 }
 
 /* Header bar */
-.main-header{
-  /* tetap gradient biar konsisten, block ini menimpa yang di atas */
-  background:linear-gradient(135deg,var(--brand-a),var(--brand-b));
-  color:#fff;
-  position:sticky; top:0; z-index:50;
-  box-shadow:0 2px 6px rgba(0,0,0,.08);
-}
-.header-container{
-  max-width:1200px; margin:0 auto; padding:10px 16px;
-  display:flex; align-items:center; justify-content:space-between; gap:14px;
-  min-height:var(--header-h);
+/* =========================================================
+   FIX HEADER AGAR MATCH FOOTER + TEXT HITAM
+   ========================================================= */
+
+/* 1. Warna header sama seperti footer */
+.main-header {
+  background: linear-gradient(145deg, hsl(209, 100%, 82%), #d5e9ff) !important;
+  color: #0f172a !important;         /* teks gelap */
+  box-shadow: 0 2px 6px rgba(0,0,0,.08);
 }
 
-/* Brand */
-.logo{display:flex; align-items:center; gap:8px}
-.logo-img{width:36px; height:36px; object-fit:contain; border-radius:10px}
-.logo-text{font-weight:700; letter-spacing:.2px}
+/* 2. Warna teks brand (nama NearBuy) jadi hitam */
+.logo-text {
+  color: #0f172a !important;
+}
 
-/* Nav (desktop) */
-.nav-links{
-  display:flex; gap:16px; flex-wrap:wrap;
+/* 3. Link navigasi header ikut hitam */
+.nav-links a {
+  color: #0f172a !important;
 }
-.nav-links a{
-  color:#fff; text-decoration:none; font-weight:600;
-  padding:8px 10px; border-radius:8px; transition:.15s ease;
+
+.nav-links a:hover {
+  background: rgba(255,255,255,0.35) !important; /* hover tetap halus */
 }
+
+/* 4. Hamburger menu bar warna hitam */
+.nav-toggle .bar {
+  background: #0f172a !important;
+}
+
+/* 5. Mobile dropdown tetap jelas */
+@media (max-width: 860px) {
+  .nav-links {
+    background: #ffffff !important; 
+    border-top: 1px solid #dbe0ea;
+  }
+
+  .nav-links a {
+    color: #0f172a !important;
+  }
+}
+
+
 .nav-links a:hover{ background:rgba(255,255,255,.12); }
 
 /* Hamburger button (hidden on desktop) */
@@ -524,7 +543,7 @@ body{
 /* =========================================================
    Footer
    ========================================================= */
-.footer-market { background:#0f172a; color:#f1f5f9; font-size:.95rem; margin-top:40px; }
+.footer-market { background:#8caaef; color:#f1f5f9; font-size:.95rem; margin-top:40px; }
 .footer-market a { color:#f1f5f9; text-decoration:none; }
 .footer-market a:hover { text-decoration:underline; }
 .footer-top {
@@ -839,7 +858,7 @@ input,button,select,textarea{font:inherit}
 }
 
 .btn-wish:focus {
-  outline: 2px solid #6366f1;
+  outline: 2px solid #b0b1e7;
   outline-offset: 2px;
 }
 
@@ -952,3 +971,124 @@ input,button,select,textarea{font:inherit}
   font-size: 0.75rem;
   color: #9ca3af;
 }
+/* =========================================================
+   NeareBuy (Updated gradient final)
+========================================================= */
+:root{
+  --brand-a:hsl(209,100%,82%); 
+  --brand-b:#d5e9ff;
+
+  --brand:#3555ff; 
+  --brand-2:#2a44cc;
+  --text:#111827;
+  --muted:#6b7280;
+  --bg:#f7f8fb;
+  --card:#ffffff;
+  --border:#e5e7eb;
+  --radius:12px;
+  --header-h:56px;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+  color:var(--text);
+  background:var(--bg);
+}
+
+
+
+/* MOBILE NAV */
+.nav-toggle{
+  display:none;width:42px;height:42px;border:0;background:transparent;cursor:pointer;border-radius:10px;
+  align-items:center;justify-content:center;
+}
+.nav-toggle .bar{
+  display:block;width:22px;height:2px;border-radius:2px;background:#fff;transition:.2s;
+}
+.nav-toggle .bar + .bar{margin-top:5px}
+
+@media(max-width:860px){
+  .nav-toggle{display:inline-flex}
+  .nav-links{
+    position:fixed;left:0;right:0;top:calc(var(--header-h));
+    background:#080606;border-top:1px solid #e5e7eb;
+    display:grid;gap:6px;padding:12px;
+    max-height:80vh;overflow:auto;
+    transform:translateY(-110%);opacity:0;visibility:hidden;
+    transition:.2s;
+  }
+  .nav-links a{color:#0f172a;background:none}
+  .main-header.is-open .nav-links{
+    transform:translateY(0);opacity:1;visibility:visible;
+  }
+  body.nav-open{overflow:hidden}
+}
+
+/* =========================================================
+   GENERAL UI COMPONENTS  (unchanged except colors)
+========================================================= */
+
+.search button,
+.btn-add,
+.btn-claim {
+  background:linear-gradient(145deg,var(--brand-a),var(--brand-b));
+  box-shadow:0 6px 14px rgba(137,170,222,.28);
+  color:#040303;
+}
+
+/* Hover tetap tone lembut */
+.search button:hover,
+.btn-add:hover,
+.btn-claim:hover {
+  filter:brightness(1.05);
+  transform:translateY(-2px);
+}
+
+/* =========================================================
+   FOOTER — Updated to match header gradient
+========================================================= */
+
+/* ==========================================
+   FOOTER – UBAH SEMUA TEKS JADI HITAM
+========================================== */
+
+.footer-market {
+   background: linear-gradient(145deg, hsl(209, 100%, 82%), #d5e9ff) !important;
+  color: #000 !important;           /* teks footer jadi hitam */
+}
+
+.footer-market a {
+  color: #000 !important;
+  font-weight: 600;
+}
+
+.footer-col h4 {
+  color: #000 !important;
+}
+
+.footer-market p,
+.footer-market li {
+  color: #000 !important;
+}
+
+/* Footer bawah */
+.footer-bottom {
+  border-top: 1px solid rgba(0,0,0,0.25) !important;
+  color: #000 !important;
+}
+
+/* Icon sosial agar tidak putih lagi */
+.social-links a img {
+  filter: invert(0%) !important; /* icon jadi hitam / gelap */
+}
+
+
+/* =========================================================
+   (All other product UI, wishlist, responsive settings remain unchanged)
+========================================================= */
+
+/* ... (SEMUA BAGIAN KODE KAMU YANG LAIN DIPERTAHANKAN TANPA DIUBAH) ... */
+

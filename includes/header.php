@@ -60,6 +60,8 @@ if ($isTokoPage) {
 
   <!-- CSS global -->
   <link rel="stylesheet" href="<?= e($BASE) ?>/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 
   <!-- CSS tambahan (produk.php, toko.php, seller, dll) -->
   <?php
@@ -85,19 +87,46 @@ if ($isTokoPage) {
     </div>
 
     <!-- Hamburger Mobile -->
-    <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="primary-nav">
-      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
-    </button>
+   <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="primary-nav">
+    <i class="fa-solid fa-bars-staggered"></i>
+</button>
+
 
     <!-- NAV ROLE BASED -->
     <nav class="nav-links" id="primary-nav">
 
       <?php if ($role === 'guest'): ?>
 
-        <a href="<?= e($BASE) ?>/index.php">Home</a>
-        <a href="<?= e($BASE) ?>/login.php">Daftar / Login</a>
-        <a href="<?= e($BASE) ?>/tentang.php">Tentang Kami</a>
-        <a href="<?= e($BASE) ?>/kontak.php">Kontak</a>
+        
+    <?php if ($role === 'guest'): ?>
+
+  <a href="<?= e($BASE) ?>/index.php">
+      <i class="fa-solid fa-house"></i> <span>Home</span>
+  </a>
+
+  <a href="<?= e($BASE) ?>/tentang.php">
+      <i class="fa-solid fa-circle-info"></i> <span>Tentang</span>
+  </a>
+
+  <a href="<?= e($BASE) ?>/kontak.php">
+      <i class="fa-solid fa-headset"></i> <span>Kontak</span>
+  </a>
+
+  <a href="<?= e($BASE) ?>/login.php" class="login-icon">
+      <i class="fa-solid fa-right-to-bracket"></i> <span>Login</span>
+  </a>
+
+<?php endif; ?>
+
+<a href="<?= e($BASE) ?>/register.php">
+    <i class="fa-solid fa-user-plus"></i> Daftar
+</a>
+
+<a href="<?= e($BASE) ?>/login.php">
+    <i class="fa-solid fa-right-to-bracket"></i> Login
+</a>
+
+        
 
       <?php elseif ($role === 'pengguna'): ?>
 
