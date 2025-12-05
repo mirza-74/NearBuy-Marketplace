@@ -290,6 +290,7 @@ try {
         <button type="submit">Cari</button>
       </form>
     </section>
+    
 
     <!-- Rekomendasi Produk Terdekat -->
     <section class="produk-section">
