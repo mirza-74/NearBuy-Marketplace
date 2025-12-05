@@ -68,8 +68,8 @@ if (!empty($FORCE_GUEST_HEADER)) {
 
     <!-- Logo -->
     <div class="logo">
-      <img src="<?= e($BASE) ?>/assets/logo-sellexa.png" class="logo-img" alt="Logo NearBuy">
-      <span class="logo-text" style="font-weight:700;">NearBuy</span>
+      <img src="<?= e($BASE) ?>/assets/logo_nearbuyheader.png" class="logo-img" alt="Logo NearBuy">
+      <span class="logo-text" style="font-weight:500px;">“Menghubungkan pelanggan dengan produk terdekat."</span>
     </div>
 
     <!-- Hamburger Mobile -->

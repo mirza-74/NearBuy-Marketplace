@@ -20,7 +20,7 @@ if (!isset($BASE) || !$BASE) {
 <footer class="footer-market">
   <div class="footer-top">
     <div class="footer-col about">
-      <img src="<?= e($BASE) ?>/assets/logo-sellexa.png" alt="NearBuy" class="footer-logo">
+      <img src="<?= e($BASE) ?>/assets/logo_nearbuy.png" alt="NearBuy" class="footer-logo">
       <p>
         <b>NearBuy Marketplace</b> adalah platform untuk menemukan kebutuhan harian 
         dari penjual terdekat di sekitar kamu. Admin hanya mengelola sistem sedangkan

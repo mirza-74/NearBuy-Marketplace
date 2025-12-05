@@ -27,15 +27,14 @@ $error   = '';
 $success = false;
 
 $old = [
-    'full_name'    => '',
+    'nama'    => '',
     'email'        => '',
     'phone'        => '',
     'gender'       => '',
     'age'          => '',
     'city'         => '',
-    'fav_category' => '',
-    'frequency'    => '',
-    'budget'       => '',
+    
+    
 ];
 
 // ========================
@@ -51,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $confirm  = trim((string)($_POST['confirm'] ?? ''));
 
     // --- VALIDATION ---
-    if ($old['full_name'] === '' || $old['email'] === '' || $password === '' || $confirm === '') {
+    if ($old['nama'] === '' || $old['email'] === '' || $password === '' || $confirm === '') {
         $error = 'Harap isi semua kolom wajib (Nama, Email, Password).';
     } elseif (!filter_var($old['email'], FILTER_VALIDATE_EMAIL)) {
         $error = 'Format email tidak valid.';
@@ -71,31 +70,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $check->execute([$old['email']]);
 
             if ($check->fetch()) {
-                $error = 'Email sudah digunakan.';
-            } else {
+    $error = 'Email sudah digunakan.';
+} else {
 
-                $pdo->beginTransaction();
+    $pdo->beginTransaction();
 
-                $hash = password_hash($password, PASSWORD_DEFAULT);
+    $hash = password_hash($password, PASSWORD_DEFAULT);
 
-                $insert = $pdo->prepare("
-                    INSERT INTO users 
-                    (email, password, full_name, phone, gender, age, city, role, is_active, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, 'pengguna', 1, NOW())
-                ");
+    $insert = $pdo->prepare("
+        INSERT INTO users 
+        (email, password, nama, phone, gender, age, city, role, is_active, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'pengguna', 1, NOW())
+    ");
 
-                $insert->execute([
-                    $old['email'],
-                    $hash,
-                    $old['full_name'],
-                    $old['phone'] ?: null,
-                    $old['gender'] ?: null,
-                    $old['age'] !== '' ? (int)$old['age'] : null,
-                    $old['city'] ?: null
-                ]);
+    $insert->execute([
+        $old['email'],
+        $hash,
+        $old['nama'],
+        $old['phone'] ?: null,
+        $old['gender'] ?: null,
+        $old['age'] !== '' ? (int)$old['age'] : null,
+        $old['city'] ?: null
+    ]);
 
-                $pdo->commit();
-                $success = true;
+    $pdo->commit();
+    $success = true;
+
+    // Redirect setelah registrasi
+    header("Location: $BASE/login.php");
+    exit;
+
 
                 // reset inputs
                 foreach ($old as $k => $_) {
@@ -152,9 +156,9 @@ function h(?string $s): string {
 
             <form method="POST" autocomplete="off" novalidate>
 
-                <label for="full_name">Nama Lengkap</label>
-                <input id="full_name" type="text" name="full_name" 
-                       value="<?= h($old['full_name']) ?>" required>
+                <label for="nama">Nama Lengkap</label>
+                <input id="nama" type="text" name="nama" 
+                       value="<?= h($old['nama']) ?>" required>
 
                 <label for="email">Email</label>
                 <input id="email" type="email" name="email"
