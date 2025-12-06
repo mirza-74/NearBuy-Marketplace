@@ -1,11 +1,11 @@
 <?php
 // ===============================================================
-// SellExa – Halaman Keranjang
+// nearbuy– Halaman Keranjang
 // Mirip Tokped: qty +/-, hapus, total, rekomendasi
 // ===============================================================
 declare(strict_types=1);
 
-$BASE = '/Marketplace_SellExa/public';
+$BASE = '/NearBuy-Marketplace/public';
 
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/db.php';

@@ -1,338 +1,282 @@
 /* =========================================================
-   SellExa – Keranjang Styles (Mirip Tokopedia)
+   🚀 NearBuy Modern Soft-Blue UI (Keranjang Style)
    ========================================================= */
 
 :root{
-  --brand:#1e2a47; 
-  --brand-2:#4b5d88;
-  --bg:#f7f8fb;
-  --card:#ffffff;
-  --border:#e5e7eb;
-  --text:#111827;
+  --primary:#2D7FF9;
+  --primary-soft:#6CB5FF;
+  --bg:#F4F7FB;
+  --card:#FFFFFF;
+  --border:#E4E8EE;
+  --text:#1A1A1A;
+  --text-light:#6B7280;
+  --radius:14px;
 }
 
-/* Wrapper utama */
+/* Wrapper */
 .cart-page{
-  max-width:1200px;
-  margin:12px auto 100px;
-  padding:0 16px 60px;
+  max-width:1180px;
+  margin:20px auto 100px;
+  padding:0 16px;
 }
 
+/* Title */
 .cart-title{
-  font-size:22px;
+  font-size:23px;
   font-weight:700;
-  margin:10px 0 18px;
+  color:var(--text);
+  margin:10px 0 20px;
 }
 
 /* ===========================
    EMPTY STATE
    =========================== */
 .cart-empty{
-  background:#fff;
-  padding:28px;
-  border-radius:14px;
+  background:var(--card);
+  padding:35px;
+  border-radius:var(--radius);
   border:1px solid var(--border);
   text-align:center;
-  color:#6b7280;
+  color:var(--text-light);
+  box-shadow:0px 4px 20px rgba(0,0,0,0.05);
 }
+
 .btn-back-shop{
   display:inline-block;
-  margin-top:12px;
-  padding:10px 18px;
-  background:linear-gradient(135deg,#3b82f6,#6366f1);
+  margin-top:16px;
+  padding:12px 22px;
+  background:linear-gradient(135deg,var(--primary-soft),var(--primary));
   color:#fff;
-  border-radius:999px;
+  border-radius:30px;
   text-decoration:none;
+  font-size:15px;
   font-weight:600;
+  transition:0.3s;
+}
+
+.btn-back-shop:hover{
+  opacity:0.85;
 }
 
 /* ===========================
-   LIST ITEM KERANJANG
+   CART LIST
    =========================== */
 .cart-section{
   display:flex;
   flex-direction:column;
-  gap:14px;
+  gap:16px;
 }
 
 .cart-item{
   display:flex;
-  gap:12px;
-  background:#fff;
-  border-radius:14px;
+  gap:14px;
+  background:var(--card);
+  border-radius:var(--radius);
   border:1px solid var(--border);
-  padding:12px;
-  box-shadow:0 2px 6px rgba(0,0,0,.03);
+  padding:14px;
+  align-items:flex-start;
+  box-shadow:0px 4px 18px rgba(0,0,0,0.04);
+  transition:0.25s;
 }
 
-/* KIRI (checkbox + gambar) */
+.cart-item:hover{
+  transform:translateY(-2px);
+}
+
+/* Left Side */
 .cart-item-left{
   display:flex;
   flex-direction:column;
-  align-items:center;
   gap:8px;
+  align-items:center;
 }
 
-/* CUSTOM CHECKBOX TOKPED STYLE */
+/* Modern Checkbox */
 .check-wrap{
+  width:22px;
+  height:22px;
   position:relative;
-  width:20px;
-  height:20px;
 }
+
 .check-wrap input{
+  opacity:0;
   position:absolute;
   inset:0;
-  opacity:0;
   cursor:pointer;
 }
+
 .check-custom{
-  display:block;
-  width:20px;
-  height:20px;
-  border:2px solid #9ca3af;
-  border-radius:4px;
+  width:22px;
+  height:22px;
+  border:2px solid #aab2c4;
+  border-radius:6px;
   background:#fff;
-  transition:.15s ease;
-}
-.check-wrap input:checked + .check-custom{
-  background:var(--brand);
-  border-color:var(--brand);
-  box-shadow:0 0 0 3px rgba(30,42,71,.3);
+  transition:0.25s;
 }
 
-/* Gambar produk */
-.cart-img-link{ display:block; }
+.check-wrap input:checked + .check-custom{
+  background:var(--primary);
+  border-color:var(--primary);
+  box-shadow:0 0 0 4px rgba(45,127,249,.25);
+}
+
+/* Product Image */
 .cart-img{
-  width:80px;
-  height:80px;
+  width:85px;
+  height:85px;
+  border-radius:12px;
   object-fit:cover;
-  border-radius:10px;
-  border:1px solid #e5e7eb;
+  border:1px solid var(--border);
 }
 
 /* ===========================
-   KANAN (detail)
+   RIGHT DETAILS
    =========================== */
 .cart-item-body{
   flex:1;
   display:flex;
   flex-direction:column;
-  justify-content:space-between;
+  gap:6px;
 }
 
-/* Judul produk */
 .cart-item-title{
-  font-size:14.5px;
-  font-weight:600;
-  line-height:1.35;
-  text-decoration:none;
-  color:var(--text);
-}
-.cart-item-title:hover{ text-decoration:underline; }
-
-/* Harga */
-.cart-price{
-  margin:6px 0;
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-.price-current{
   font-size:15px;
-  font-weight:700;
-  color:#1f2937;
+  font-weight:600;
+  color:var(--text);
+  text-decoration:none;
 }
+
+.cart-price{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+.price-current{
+  color:var(--primary);
+  font-size:16px;
+  font-weight:700;
+}
+
 .price-compare{
   font-size:13px;
   color:#9ca3af;
   text-decoration:line-through;
 }
 
-/* --- BOTTOM BAR: Qty control dan Hapus --- */
+/* ===========================
+   Qty + Remove
+   =========================== */
 .cart-item-bottom{
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  margin-top:8px;
+  margin-top:6px;
+  align-items:center;
 }
 
-/* ===========================
-   QTY CONTROL (+ / −)
-   =========================== */
 .qty-form{
   display:flex;
+  gap:8px;
   align-items:center;
-  gap:6px;
 }
+
 .qty-btn{
-  width:28px;
-  height:28px;
-  background:#f3f4f6;
-  border:1px solid #d1d5db;
-  border-radius:6px;
-  font-size:18px;
-  line-height:0;
+  width:30px;
+  height:30px;
+  background:#eef2f7;
+  border:1px solid #d7dce5;
+  border-radius:8px;
   cursor:pointer;
-  transition:.15s;
+  font-size:20px;
+  transition:0.25s;
 }
+
 .qty-btn:hover{
-  background:#e5e7eb;
+  background:#dfe7f3;
 }
+
 .qty-value{
-  min-width:22px;
+  min-width:26px;
   text-align:center;
   font-weight:600;
 }
 
-/* Tombol hapus */
 .btn-remove{
   background:none;
   border:none;
-  color:#ef4444;
-  font-weight:600;
+  color:#FF4B4B;
   cursor:pointer;
+  font-weight:600;
+  font-size:14px;
 }
 .btn-remove:hover{
   text-decoration:underline;
 }
 
-/* =========================================================
-   REKOMENDASI PRODUK
-   ========================================================= */
+/* ===========================
+   RECOMMENDATIONS
+   =========================== */
 .cart-recom-section{
-  margin-top:28px;
+  margin-top:30px;
 }
+
 .cart-recom-section h2{
   font-size:18px;
   font-weight:700;
-  margin-bottom:12px;
 }
 
 .recom-grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
-  gap:14px;
+  gap:18px;
 }
 
 .recom-card{
   background:#fff;
-  padding:10px;
   border:1px solid var(--border);
-  border-radius:12px;
+  border-radius:14px;
+  padding:12px;
   text-align:center;
-  box-shadow:0 2px 5px rgba(0,0,0,.03);
+  transition:0.3s;
+}
+.recom-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0px 8px 25px rgba(0,0,0,.05);
 }
 
-.recom-img{
-  width:100%;
-  height:150px;
-  object-fit:cover;
-  border-radius:10px;
-  background:#f3f4f6;
-}
-
-.recom-title{
-  font-size:13px;
-  font-weight:600;
-  margin:8px 0;
-  height:32px;
-  overflow:hidden;
-}
-
-.recom-price{
-  margin-top:4px;
-}
-.recom-price-current{
-  font-weight:700;
-}
-.recom-price-compare{
-  font-size:12px;
-  color:#9ca3af;
-  text-decoration:line-through;
-}
-
-.recom-btn{
-  margin-top:10px;
-  width:100%;
-  padding:8px 0;
-  background:var(--brand);
-  color:#fff;
-  border:none;
-  border-radius:10px;
-  font-weight:700;
-  cursor:pointer;
-}
-.recom-btn:hover{
-  background:var(--brand-2);
-}
-
-/* =========================================================
-   SUMMARY BAR (bagian bawah, fixed)
-   ========================================================= */
+/* ===========================
+   BOTTOM SUMMARY BAR
+   =========================== */
 .cart-summary-bar{
   position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
+  bottom:0; left:0; right:0;
   background:#fff;
   border-top:1px solid var(--border);
-  box-shadow:0 -2px 8px rgba(0,0,0,.06);
-  padding:10px 16px;
+  padding:14px 20px;
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  z-index:50;
-}
-
-.summary-left{
-  display:flex;
   align-items:center;
-  gap:6px;
-}
-.summary-text{
-  font-weight:600;
+  box-shadow:0px -4px 14px rgba(0,0,0,.07);
+  z-index:99;
 }
 
-.summary-mid{
-  text-align:right;
-}
-.summary-label{
-  font-size:12px;
-  color:#6b7280;
-}
-.summary-total{
-  font-size:15px;
-  font-weight:700;
-}
-
-.summary-right
 .btn-buy-main{
-  background:linear-gradient(135deg,#3b82f6,#6366f1);
+  background:linear-gradient(135deg,var(--primary-soft),var(--primary));
+  padding:12px 24px;
   color:#fff;
-  padding:10px 20px;
-  border:none;
-  border-radius:10px;
   font-weight:700;
+  border-radius:12px;
+  border:none;
   cursor:pointer;
-}
-.btn-buy-main:hover{
-  opacity:.85;
+  transition:0.25s;
 }
 
-/* MOBILE */
+.btn-buy-main:hover{
+  opacity:0.85;
+}
+
+/* Mobile Adjustments */
 @media(max-width:540px){
-  .cart-item{
-    padding:10px;
-  }
-  .cart-img{
-    width:70px;
-    height:70px;
-  }
-  .qty-btn{
-    width:26px;
-    height:26px;
-  }
-  .btn-buy-main{
-    padding:8px 16px;
-  }
+  .cart-img{ width:70px; height:70px; }
+  .btn-buy-main{ padding:10px 16px; }
 }
