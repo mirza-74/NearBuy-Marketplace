@@ -430,7 +430,7 @@ try {
           <?php foreach ($categories as $cat): ?>
             <li style="margin-bottom: 4px;">
               <a 
-                href="<?= e($BASE) ?>/category.php?slug=<?= urlencode($cat['slug']) ?>" 
+                href="<?= e($BASE) ?>/kategori.php?slug=<?= urlencode($cat['slug']) ?>" 
                 style="text-decoration: none; color: #4b5563; display: block; padding: 4px 0;">
                 <?= e($cat['name']) ?>
               </a>
