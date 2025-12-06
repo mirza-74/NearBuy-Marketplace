@@ -162,7 +162,8 @@ $email    = (string)($user['email'] ?? '');
   <section class="profile-section">
     <div class="section-header">
       <h2>Transaksi</h2>
-      <a href="<?= e($BASE) ?>/transaksi.php" class="section-link">Lihat semua</a>
+      
+      <a href="<?= e($BASE) ?>/transaksi.php" class="profile-edit-link">Lihat Semua</a>
     </div>
     <div class="profile-menu-grid">
       <a href="<?= e($BASE) ?>/transaksi.php?tab=bayar" class="profile-menu-item">
@@ -204,7 +205,7 @@ $email    = (string)($user['email'] ?? '');
         <?php endif; ?>
       </a>
 
-      <a href="<?= e($BASE) ?>/alamat.php" class="profile-menu-item">
+      <a href="<?= e($BASE) ?>/set_lokasi.php" class="profile-menu-item">
         <div class="menu-icon square">📍</div>
         <div class="menu-text">Alamat</div>
       </a>
