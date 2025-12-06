@@ -1,10 +1,10 @@
 <?php
 // ===============================================================
-// SellExa – Detail Produk
+// NearBuy – Detail Produk (diperbarui: tampilkan jarak ke lokasi user)
 // ===============================================================
 declare(strict_types=1);
 
-$BASE = '/Marketplace_SellExa/public';
+$BASE = '/NearBuy-marketplace/public';
 
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/db.php';
@@ -22,7 +22,13 @@ $userId  = (int)($user['id'] ?? 0);
 // header umum
 require_once __DIR__ . '/../includes/header.php';
 
-// ---------- Helper upload gambar ----------
+// ---------- Helper dasar ----------
+if (!function_exists('e')) {
+    function e($s): string {
+        return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+    }
+}
+
 if (!function_exists('is_https_url')) {
     function is_https_url(string $p): bool {
         return (bool)preg_match('~^https?://~i', $p);
@@ -46,6 +52,30 @@ if (!function_exists('upload_image_url')) {
     }
 }
 
+// ---------- Helper Haversine & format ----------
+if (!function_exists('haversine_km')) {
+    function haversine_km(float $lat1, float $lon1, float $lat2, float $lon2): float {
+        $R = 6371.0; // radius bumi km
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+             cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+             sin($dLon / 2) * sin($dLon / 2);
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+        return $R * $c;
+    }
+}
+if (!function_exists('format_distance_label')) {
+    function format_distance_label(?float $km): string {
+        if ($km === null) return '';
+        if ($km >= 1) {
+            return round($km, 1) . ' km dari lokasi Anda';
+        }
+        $m = (int)round($km * 1000);
+        return $m . ' m dari lokasi Anda';
+    }
+}
+
 // ---------- Ambil slug ----------
 $slug = trim((string)($_GET['slug'] ?? ''));
 if ($slug === '') {
@@ -53,7 +83,7 @@ if ($slug === '') {
     exit;
 }
 
-// ---------- Ambil produk ----------
+// ---------- Ambil produk (dengan info toko jika ada) ----------
 $stmt = $pdo->prepare("
     SELECT 
       p.id,
@@ -69,8 +99,14 @@ $stmt = $pdo->prepare("
       (SELECT COUNT(1) 
          FROM product_variants v 
         WHERE v.product_id = p.id 
-          AND v.is_active = 1) AS variant_count
+          AND v.is_active = 1) AS variant_count,
+      s.id AS shop_id,
+      s.name AS shop_name,
+      s.latitude AS shop_lat,
+      s.longitude AS shop_lng,
+      s.address AS shop_address
     FROM products p
+    LEFT JOIN shops s ON s.id = p.shop_id
     WHERE p.slug = ?
     LIMIT 1
 ");
@@ -113,7 +149,7 @@ try {
         $images[] = upload_image_url($rowPath, $BASE);
     }
 } catch (Throwable $e) {
-    // kalau tabel tidak ada, abaikan
+    // jika tabel tidak ada, abaikan
 }
 
 $mainImg = upload_image_url($product['main_image'] ?? null, $BASE);
@@ -142,8 +178,41 @@ if (!$isGuest && $userId > 0) {
     }
 }
 
-// ---------- Back URL ----------
-$currentUrl = $BASE.'/detail_produk.php?slug='.urlencode($slug);
+// ---------- Back URL (dipakai di form wishlist) ----------
+$currentUrl = $BASE . '/detail_produk.php?slug=' . urlencode($slug);
+
+// ---------- Lokasi user (prioritas session, lalu DB user) ----------
+$userLat = isset($_SESSION['user_lat']) ? (float)$_SESSION['user_lat'] : null;
+$userLng = isset($_SESSION['user_lng']) ? (float)$_SESSION['user_lng'] : null;
+
+if (($userLat === null || $userLng === null) && $userId > 0) {
+    try {
+        $stmtUL = $pdo->prepare("SELECT latitude, longitude FROM users WHERE id = ? LIMIT 1");
+        $stmtUL->execute([$userId]);
+        $uLoc = $stmtUL->fetch(PDO::FETCH_ASSOC);
+        if ($uLoc && $uLoc['latitude'] !== null && $uLoc['longitude'] !== null) {
+            $userLat = (float)$uLoc['latitude'];
+            $userLng = (float)$uLoc['longitude'];
+        }
+    } catch (Throwable $e) {
+        // ignore
+    }
+}
+
+// ---------- Hitung jarak ke toko (jika tersedia) ----------
+$distanceKm = null;
+$distanceLabel = '';
+$shopLat = isset($product['shop_lat']) ? $product['shop_lat'] : null;
+$shopLng = isset($product['shop_lng']) ? $product['shop_lng'] : null;
+$shopName = $product['shop_name'] ?? null;
+
+if ($userLat !== null && $userLng !== null && $shopLat !== null && $shopLng !== null) {
+    // pastikan numeric
+    if (is_numeric($shopLat) && is_numeric($shopLng)) {
+        $distanceKm = haversine_km((float)$userLat, (float)$userLng, (float)$shopLat, (float)$shopLng);
+        $distanceLabel = format_distance_label($distanceKm);
+    }
+}
 
 // ---------- Hitung promo ----------
 $hasPromo = (!is_null($product['compare_price']) && (float)$product['compare_price'] > (float)$product['price']);
@@ -347,6 +416,29 @@ try {
           <span class="label">Kode Produk</span>
           <span class="value">#<?= (int)$productId ?></span>
         </div>
+
+        <!-- TAMPILKAN NAMA TOKO & JARAK (JIKA ADA) -->
+        <?php if (!empty($shopName)): ?>
+          <div class="detail-meta-item">
+            <span class="label">Toko</span>
+            <span class="value"><?= e($shopName) ?><?php if (!empty($product['shop_address'])): ?> · <?= e($product['shop_address']) ?><?php endif; ?></span>
+          </div>
+        <?php endif; ?>
+
+        <?php if ($distanceLabel !== ''): ?>
+          <div class="detail-meta-item">
+            <span class="label">Jarak</span>
+            <span class="value"><?= e($distanceLabel) ?></span>
+          </div>
+        <?php else: ?>
+          <div class="detail-meta-item">
+            <span class="label">Jarak</span>
+            <span class="value">
+              <a href="<?= e($BASE) ?>/profil.php">Atur lokasi di Profil</a>
+            </span>
+          </div>
+        <?php endif; ?>
+
       </div>
 
       <?php if ($stock > 0): ?>

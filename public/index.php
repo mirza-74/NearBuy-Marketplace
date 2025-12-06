@@ -26,6 +26,34 @@ $userPoints = $isGuest ? 0 : (int)($user['points'] ?? 0);
 $userLat = isset($_SESSION['user_lat']) ? (float)$_SESSION['user_lat'] : null;
 $userLng = isset($_SESSION['user_lng']) ? (float)$_SESSION['user_lng'] : null;
 
+/* ----------------------
+   HELPER: Haversine km
+   ---------------------- */
+if (!function_exists('haversine_km')) {
+    function haversine_km(float $lat1, float $lon1, float $lat2, float $lon2): float {
+        $R = 6371.0; // Earth radius in km
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+             cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+             sin($dLon / 2) * sin($dLon / 2);
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+        return $R * $c;
+    }
+}
+
+if (!function_exists('format_distance_label')) {
+    function format_distance_label(?float $km): string {
+        if ($km === null) return '';
+        if ($km >= 1) {
+            return round($km, 1) . ' km dari lokasi Anda';
+        }
+        // < 1 km -> meter
+        $m = (int)round($km * 1000);
+        return $m . ' m dari lokasi Anda';
+    }
+}
+
 // ===================== HELPER Gambar dan URL =====================
 if (!function_exists('is_https_url')) {
   function is_https_url(string $p): bool {
@@ -81,7 +109,6 @@ $homeBannerPath = (function() use ($pdo, $BASE) {
 })();
 
 // ===================== PRODUK KEBUTUHAN SEHARI HARI =====================
-// contoh slug kategori yang dianggap kebutuhan harian
 $dailySlugList = [
     'beras',
     'air-galon',
@@ -90,14 +117,12 @@ $dailySlugList = [
     'makanan-minuman'
 ];
 
-// search sederhana untuk nama produk
 $searchQRaw = isset($_GET['q']) ? trim((string)$_GET['q']) : '';
 $searchQ    = mb_substr($searchQRaw, 0, 80);
 
 $where  = ["p.is_active = 1", "p.stock > 0", "u.role = 'seller'"];
 $params = [];
 
-// filter hanya kebutuhan sehari hari jika slug diset
 if (!empty($dailySlugList)) {
     $inPlaceholders = implode(',', array_fill(0, count($dailySlugList), '?'));
     $where[] = "c.slug IN ($inPlaceholders)";
@@ -106,7 +131,6 @@ if (!empty($dailySlugList)) {
     }
 }
 
-// filter search jika ada
 if ($searchQ !== '') {
     $where[] = "(p.title LIKE ? OR p.description LIKE ?)";
     $params[] = "%{$searchQ}%";
@@ -129,6 +153,8 @@ try {
                 p.compare_price,
                 p.main_image,
                 s.name AS shop_name,
+                s.latitude AS shop_lat,
+                s.longitude AS shop_lng,
                 (
                     6371 * ACOS(
                         COS(RADIANS(:user_lat)) 
@@ -174,7 +200,9 @@ try {
                 p.price,
                 p.compare_price,
                 p.main_image,
-                s.name AS shop_name
+                s.name AS shop_name,
+                s.latitude AS shop_lat,
+                s.longitude AS shop_lng
             FROM products p
             JOIN shops s ON s.id = p.shop_id
             JOIN users u ON u.id = s.user_id
@@ -248,6 +276,8 @@ try {
                 p.compare_price,
                 p.main_image,
                 s.name AS shop_name,
+                s.latitude AS shop_lat,
+                s.longitude AS shop_lng,
                 p.created_at
             FROM products p
             JOIN shops s ON s.id = p.shop_id
@@ -261,6 +291,24 @@ try {
         }
         $stmtDet->execute();
         $produk = $stmtDet->fetchAll(PDO::FETCH_ASSOC);
+
+        // jika user punya lokasi, hitung jarak tiap produk (fallback jika distance_km tidak tersedia)
+        if ($userLat !== null && $userLng !== null) {
+            foreach ($produk as &$pp) {
+                if (isset($pp['distance_km']) && $pp['distance_km'] !== null) {
+                    // sudah ada dari query (tidak likely here) — keep it
+                    $pp['distance_km'] = (float)$pp['distance_km'];
+                } else {
+                    // hitung via Haversine PHP menggunakan koordinat toko (shop_lat/shop_lng)
+                    if (!empty($pp['shop_lat']) && !empty($pp['shop_lng'])) {
+                        $pp['distance_km'] = haversine_km($userLat, $userLng, (float)$pp['shop_lat'], (float)$pp['shop_lng']);
+                    } else {
+                        $pp['distance_km'] = null;
+                    }
+                }
+            }
+            unset($pp);
+        }
     }
 } catch (Throwable $e) {
     // jika struktur tabel belum lengkap, biarkan produk kosong
@@ -310,6 +358,15 @@ try {
             $img = upload_image_url($r['main_image'] ?? null, $BASE);
             $hasPromo = (!is_null($r['compare_price']) && (float)$r['compare_price'] > (float)$r['price']);
             $detailUrl = $BASE . '/detail_produk.php?slug=' . urlencode($r['slug']);
+
+            // format distance label: prefer distance_km from query, else null
+            $distLabel = '';
+            if (isset($r['distance_km']) && $r['distance_km'] !== null) {
+                $distLabel = format_distance_label((float)$r['distance_km']);
+            } elseif (!empty($r['shop_lat']) && !empty($r['shop_lng']) && $userLat !== null && $userLng !== null) {
+                $tmpKm = haversine_km($userLat, $userLng, (float)$r['shop_lat'], (float)$r['shop_lng']);
+                $distLabel = format_distance_label($tmpKm);
+            }
           ?>
             <a class="produk-card" href="<?= e($detailUrl) ?>">
               <div class="img-wrap">
@@ -319,7 +376,7 @@ try {
                 <?php endif; ?>
               </div>
               <h3 class="judul"><?= e($r['title']) ?></h3>
-              <p class="subtext">Toko: <?= e($r['shop_name'] ?? 'NearBuy Seller') ?></p>
+              <p class="subtext">Toko: <?= e($r['shop_name'] ?? 'NearBuy Seller') ?><?php if ($distLabel): ?> · <span style="color:#64748b;font-size:0.9rem;"><?= e($distLabel) ?></span><?php endif; ?></p>
               <p class="harga">
                 <?php if ($hasPromo): ?>
                   <del>Rp<?= number_format((float)$r['compare_price'], 0, ',', '.') ?></del><br>
@@ -349,6 +406,14 @@ try {
             $img = upload_image_url($p['main_image'] ?? null, $BASE);
             $hasPromo = (!is_null($p['compare_price']) && (float)$p['compare_price'] > (float)$p['price']);
             $detailUrl = $BASE . '/detail_produk.php?slug=' . urlencode($p['slug']);
+
+            $distLabel = '';
+            if (isset($p['distance_km']) && $p['distance_km'] !== null) {
+                $distLabel = format_distance_label((float)$p['distance_km']);
+            } elseif (!empty($p['shop_lat']) && !empty($p['shop_lng']) && $userLat !== null && $userLng !== null) {
+                $tmpKm = haversine_km($userLat, $userLng, (float)$p['shop_lat'], (float)$p['shop_lng']);
+                $distLabel = format_distance_label($tmpKm);
+            }
           ?>
             <a class="produk-card" href="<?= e($detailUrl) ?>">
               <div class="img-wrap">
@@ -358,7 +423,7 @@ try {
                 <?php endif; ?>
               </div>
               <h3 class="judul"><?= e($p['title']) ?></h3>
-              <p class="subtext">Toko: <?= e($p['shop_name'] ?? 'NearBuy Seller') ?></p>
+              <p class="subtext">Toko: <?= e($p['shop_name'] ?? 'NearBuy Seller') ?><?php if ($distLabel): ?> · <span style="color:#64748b;font-size:0.9rem;"><?= e($distLabel) ?></span><?php endif; ?></p>
               <p class="harga">
                 <?php if ($hasPromo): ?>
                   <del>Rp<?= number_format((float)$p['compare_price'], 0, ',', '.') ?></del><br>
