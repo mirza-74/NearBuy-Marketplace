@@ -1,13 +1,16 @@
 <?php
 // ===============================================================
-// NearBuy – Halaman Toko Saya
+// NearBuy – Halaman Toko Saya (Dashboard Seller)
 // ===============================================================
 declare(strict_types=1);
 
+// BASE: otomatis, buang "/seller" di ujung
+$scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+$BASE = preg_replace('~/seller$~', '', rtrim($scriptDir, '/'));
+
+// includes
 require_once __DIR__ . '/../../includes/session.php';
 require_once __DIR__ . '/../../includes/db.php';
-
-$BASE = '/NearBuy-Marketplace/public';
 
 // helper escape
 if (!function_exists('e')) {
@@ -25,13 +28,20 @@ if (!$user || empty($user['id'])) {
 
 $userId = (int)$user['id'];
 
-// ambil toko milik user
+// ambil toko milik user (1 user 1 toko)
 $shop    = null;
 $hasShop = false;
 
 try {
     $stmt = $pdo->prepare("
-        SELECT id, name, address, latitude, longitude, is_active, created_at
+        SELECT 
+          id, 
+          name, 
+          address, 
+          latitude, 
+          longitude, 
+          is_active, 
+          created_at
         FROM shops
         WHERE user_id = ?
         LIMIT 1
@@ -44,8 +54,8 @@ try {
     $hasShop = false;
 }
 
-// kasih tahu header kalau halaman ini pakai CSS khusus toko
-$EXTRA_CSS = ['seller/style-toko.css'];
+// CSS khusus toko sekarang otomatis dari header.php
+// (header akan cek nama file 'toko.php' dan load seller/style-toko.css)
 
 // muat header umum
 require_once __DIR__ . '/../../includes/header.php';
@@ -54,6 +64,8 @@ require_once __DIR__ . '/../../includes/header.php';
 <div class="nb-shell">
 
   <?php if ($hasShop): ?>
+    <?php $isActiveShop = !empty($shop['is_active']); ?>
+
     <!-- ======================= -->
     <!-- USER SUDAH PUNYA TOKO   -->
     <!-- ======================= -->
@@ -81,7 +93,7 @@ require_once __DIR__ . '/../../includes/header.php';
       <div class="nb-field">
         <div class="nb-label">Status</div>
         <div class="nb-value">
-          <?php if (!empty($shop['is_active'])): ?>
+          <?php if ($isActiveShop): ?>
             <span class="nb-pill">Aktif</span>
           <?php else: ?>
             <span class="nb-pill inactive">Menunggu persetujuan admin</span>
@@ -96,13 +108,26 @@ require_once __DIR__ . '/../../includes/header.php';
         </div>
       </div>
 
+      <div class="nb-field">
+        <div class="nb-label">Koordinat Lokasi</div>
+        <div class="nb-value">
+          Lat: <?= e((string)$shop['latitude']) ?> · Lng: <?= e((string)$shop['longitude']) ?>
+        </div>
+      </div>
+
       <div class="nb-actions nb-actions-top">
-        <a class="nb-btn nb-btn-primary" href="<?= e($BASE) ?>/seller/index.php">
-          Masuk Dashboard
-        </a>
-        <a class="nb-btn" href="<?= e($BASE) ?>/seller/produk.php">
-          Kelola Produk
-        </a>
+        <?php if ($isActiveShop): ?>
+          <!-- Toko aktif: boleh kelola produk -->
+          <a class="nb-btn nb-btn-primary" href="<?= e($BASE) ?>/seller/produk.php">
+            Kelola Produk
+          </a>
+        <?php else: ?>
+          <!-- Toko belum aktif: tombol kelola produk di-disable -->
+          <button class="nb-btn" type="button" disabled title="Toko belum aktif">
+            Kelola Produk (menunggu persetujuan)
+          </button>
+        <?php endif; ?>
+
         <a class="nb-btn nb-btn-secondary" href="<?= e($BASE) ?>/seller/lokasi.php">
           Atur Lokasi Toko
         </a>
@@ -137,9 +162,15 @@ require_once __DIR__ . '/../../includes/header.php';
         <div class="nb-products-grid">
           <?php foreach ($preview as $p): ?>
             <?php
-              $img = $p['main_image']
-                     ? $BASE . '/uploads/' . ltrim($p['main_image'], '/')
-                     : 'https://via.placeholder.com/160x120?text=No+Image';
+              if (!empty($p['main_image'])) {
+                  if (preg_match('~^https?://~i', $p['main_image'])) {
+                      $img = $p['main_image'];
+                  } else {
+                      $img = $BASE . '/uploads/' . ltrim($p['main_image'], '/');
+                  }
+              } else {
+                  $img = 'https://via.placeholder.com/160x120?text=No+Image';
+              }
 
               $hasPromo = !is_null($p['compare_price']) && (float)$p['compare_price'] > (float)$p['price'];
             ?>

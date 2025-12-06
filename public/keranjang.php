@@ -1,52 +1,67 @@
 <?php
 // ===============================================================
-// nearbuy– Halaman Keranjang
-// Mirip Tokped: qty +/-, hapus, total, rekomendasi
+// NearBuy – Halaman Keranjang
 // ===============================================================
 declare(strict_types=1);
 
-$BASE = '/NearBuy-Marketplace/public';
+// BASE otomatis
+$scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+$BASE = rtrim($scriptDir, '/');
+if ($BASE === '' || $BASE === '/') {
+    $BASE = '/NearBuy-marketplace/public';
+}
 
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/db.php';
-require_once __DIR__ . '/../includes/settings.php';
 
-// pastikan user login
+// helper escape
+if (!function_exists('e')) {
+    function e(string $s): string {
+        return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+// ambil user & role
 $user = $_SESSION['user'] ?? null;
 $role = $user['role'] ?? 'guest';
-if (!$user || !in_array($role, ['pengguna','admin'], true)) {
-    header('Location: '.$BASE.'/login.php?next='.urlencode($BASE.'/keranjang.php'));
+
+if (!$user || !in_array($role, ['pengguna', 'seller'], true)) {
+    header('Location: ' . $BASE . '/login.php');
     exit;
 }
+
 $userId = (int)$user['id'];
 
 // untuk load CSS tambahan
 $EXTRA_CSS = ['style-keranjang.css'];
 
+// header global
 require_once __DIR__ . '/../includes/header.php';
 
-// -------------------- Helper kecil --------------------
+// -------------------- Helper kecil gambar --------------------
 if (!function_exists('upload_image_url')) {
     function upload_image_url(?string $path, string $BASE): string {
         if (!$path) return 'https://via.placeholder.com/200x200?text=No+Image';
         if (preg_match('~^https?://~i', $path)) return $path;
         $p = ltrim($path, '/');
         if (str_starts_with($p, 'products/')) {
-            return rtrim($BASE, '/').'/uploads/'.$p;
+            return rtrim($BASE, '/') . '/uploads/' . $p;
         }
         if (str_starts_with($p, 'uploads/')) {
-            return rtrim($BASE, '/').'/'.$p;
+            return rtrim($BASE, '/') . '/' . $p;
         }
         if (str_starts_with($p, 'public/uploads/')) {
-            return rtrim($BASE, '/').'/'.substr($p, 7);
+            return rtrim($BASE, '/') . '/' . substr($p, 7);
         }
-        return rtrim($BASE, '/').'/uploads/'.$p;
+        return rtrim($BASE, '/') . '/uploads/' . $p;
     }
 }
 
 // -------------------- Handle aksi (POST) --------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (function_exists('csrf_verify_or_die')) { csrf_verify_or_die(); }
+    if (function_exists('csrf_verify_or_die')) {
+        csrf_verify_or_die();
+    }
 
     $action = $_POST['action'] ?? '';
     try {
@@ -78,13 +93,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $upd = $pdo->prepare("UPDATE cart_items SET qty = :qty WHERE id = :id");
                 $upd->execute([':qty' => $newQty, ':id' => $cartItemId]);
             }
+
         } elseif ($action === 'remove_item') {
             $cartItemId = max(0, (int)($_POST['cart_item_id'] ?? 0));
+
             // hapus item milik cart user
             $del = $pdo->prepare("
                 DELETE ci FROM cart_items ci
                 JOIN carts c ON ci.cart_id = c.id
-                WHERE ci.id = :ciid AND c.user_id = :uid AND c.status='active'
+                WHERE ci.id = :ciid 
+                  AND c.user_id = :uid 
+                  AND c.status='active'
             ");
             $del->execute([':ciid' => $cartItemId, ':uid' => $userId]);
         }
@@ -92,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // boleh kamu log error di sini kalau mau
     }
 
-    header('Location: '.$BASE.'/keranjang.php');
+    header('Location: ' . $BASE . '/keranjang.php');
     exit;
 }
 
@@ -132,9 +151,9 @@ if ($cartId > 0) {
     $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($items as &$it) {
-        $qty = (int)$it['qty'];
+        $qty   = (int)$it['qty'];
         $price = (float)$it['price'];
-        $sub = $qty * $price;
+        $sub   = $qty * $price;
         $it['subtotal'] = $sub;
         $totalSubtotal += $sub;
         $totalItems    += $qty;
@@ -145,39 +164,43 @@ if ($cartId > 0) {
 // -------------------- Rekomendasi Produk --------------------
 $rekom = [];
 if ($userId > 0) {
-    $stmt = $pdo->prepare("
-        SELECT DISTINCT 
-          r.product_id AS id,
-          r.slug,
-          r.title,
-          r.price,
-          r.compare_price,
-          r.main_image
-        FROM v_user_recommendations r
-        WHERE r.user_id = :uid
-          AND r.stock > 0
-          AND r.product_id NOT IN (
-            SELECT ci.product_id
-            FROM carts c 
-            JOIN cart_items ci ON ci.cart_id = c.id
-            WHERE c.user_id = :uid AND c.status='active'
-          )
-        ORDER BY r.popularity DESC, r.created_at DESC
-        LIMIT 8
-    ");
-    $stmt->execute([':uid' => $userId]);
-    $rekom = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // fallback kalau kosong
-    if (empty($rekom)) {
-        $stmt = $pdo->query("
-            SELECT id, slug, title, price, compare_price, main_image
-            FROM products
-            WHERE is_active=1 AND stock>0
-            ORDER BY popularity DESC, created_at DESC
+    try {
+        $stmt = $pdo->prepare("
+            SELECT DISTINCT 
+              r.product_id AS id,
+              r.slug,
+              r.title,
+              r.price,
+              r.compare_price,
+              r.main_image
+            FROM v_user_recommendations r
+            WHERE r.user_id = :uid
+              AND r.stock > 0
+              AND r.product_id NOT IN (
+                SELECT ci.product_id
+                FROM carts c 
+                JOIN cart_items ci ON ci.cart_id = c.id
+                WHERE c.user_id = :uid AND c.status='active'
+              )
+            ORDER BY r.popularity DESC, r.created_at DESC
             LIMIT 8
         ");
+        $stmt->execute([':uid' => $userId]);
         $rekom = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // fallback kalau kosong
+        if (empty($rekom)) {
+            $stmt = $pdo->query("
+                SELECT id, slug, title, price, compare_price, main_image
+                FROM products
+                WHERE is_active=1 AND stock>0
+                ORDER BY popularity DESC, created_at DESC
+                LIMIT 8
+            ");
+            $rekom = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+    } catch (Throwable $e) {
+        $rekom = [];
     }
 }
 ?>
@@ -196,15 +219,18 @@ if ($userId > 0) {
     <!-- LIST ITEM KERANJANG -->
     <section class="cart-section">
       <?php foreach ($items as $it): 
-        $img = upload_image_url($it['main_image'] ?? null, $BASE);
+        $img      = upload_image_url($it['main_image'] ?? null, $BASE);
         $hasPromo = (!is_null($it['compare_price']) && (float)$it['compare_price'] > (float)$it['price']);
-        $detailUrl = $BASE.'/detail_produk.php?slug='.urlencode($it['slug']);
+        $detailUrl = $BASE . '/detail_produk.php?slug=' . urlencode($it['slug']);
       ?>
       <div class="cart-item">
         <!-- checkbox + gambar -->
         <div class="cart-item-left">
           <label class="check-wrap">
-            <input type="checkbox" class="item-check" checked data-subtotal="<?= (float)$it['subtotal'] ?>">
+            <input type="checkbox"
+                   class="item-check"
+                   checked
+                   data-subtotal="<?= (float)$it['subtotal'] ?>">
             <span class="check-custom"></span>
           </label>
 
@@ -221,10 +247,16 @@ if ($userId > 0) {
 
           <div class="cart-price">
             <?php if ($hasPromo): ?>
-              <span class="price-current">Rp<?= number_format((float)$it['price'], 0, ',', '.') ?></span>
-              <span class="price-compare">Rp<?= number_format((float)$it['compare_price'], 0, ',', '.') ?></span>
+              <span class="price-current">
+                Rp<?= number_format((float)$it['price'], 0, ',', '.') ?>
+              </span>
+              <span class="price-compare">
+                Rp<?= number_format((float)$it['compare_price'], 0, ',', '.') ?>
+              </span>
             <?php else: ?>
-              <span class="price-current">Rp<?= number_format((float)$it['price'], 0, ',', '.') ?></span>
+              <span class="price-current">
+                Rp<?= number_format((float)$it['price'], 0, ',', '.') ?>
+              </span>
             <?php endif; ?>
           </div>
 
@@ -235,9 +267,17 @@ if ($userId > 0) {
               <input type="hidden" name="action" value="update_qty">
               <input type="hidden" name="cart_item_id" value="<?= (int)$it['cart_item_id'] ?>">
 
-              <button type="submit" name="qty" value="<?= max(1, (int)$it['qty'] - 1) ?>" class="qty-btn" aria-label="Kurangi jumlah">−</button>
+              <button type="submit"
+                      name="qty"
+                      value="<?= max(1, (int)$it['qty'] - 1) ?>"
+                      class="qty-btn"
+                      aria-label="Kurangi jumlah">−</button>
               <span class="qty-value"><?= (int)$it['qty'] ?></span>
-              <button type="submit" name="qty" value="<?= (int)$it['qty'] + 1 ?>" class="qty-btn" aria-label="Tambah jumlah">+</button>
+              <button type="submit"
+                      name="qty"
+                      value="<?= (int)$it['qty'] + 1 ?>"
+                      class="qty-btn"
+                      aria-label="Tambah jumlah">+</button>
             </form>
 
             <!-- hapus -->
@@ -260,9 +300,9 @@ if ($userId > 0) {
       <h2>Rekomendasi untukmu</h2>
       <div class="recom-grid">
         <?php foreach ($rekom as $p):
-          $img = upload_image_url($p['main_image'] ?? null, $BASE);
+          $img      = upload_image_url($p['main_image'] ?? null, $BASE);
           $hasPromo = (!is_null($p['compare_price']) && (float)$p['compare_price'] > (float)$p['price']);
-          $detailUrl = $BASE.'/detail_produk.php?slug='.urlencode($p['slug']);
+          $detailUrl = $BASE . '/detail_produk.php?slug=' . urlencode($p['slug']);
         ?>
         <div class="recom-card">
           <a href="<?= e($detailUrl) ?>" class="recom-link">
@@ -270,10 +310,16 @@ if ($userId > 0) {
             <h3 class="recom-title"><?= e($p['title']) ?></h3>
             <div class="recom-price">
               <?php if ($hasPromo): ?>
-                <span class="recom-price-current">Rp<?= number_format((float)$p['price'],0,',','.') ?></span>
-                <span class="recom-price-compare">Rp<?= number_format((float)$p['compare_price'],0,',','.') ?></span>
+                <span class="recom-price-current">
+                  Rp<?= number_format((float)$p['price'], 0, ',', '.') ?>
+                </span>
+                <span class="recom-price-compare">
+                  Rp<?= number_format((float)$p['compare_price'], 0, ',', '.') ?>
+                </span>
               <?php else: ?>
-                <span class="recom-price-current">Rp<?= number_format((float)$p['price'],0,',','.') ?></span>
+                <span class="recom-price-current">
+                  Rp<?= number_format((float)$p['price'], 0, ',', '.') ?>
+                </span>
               <?php endif; ?>
             </div>
           </a>

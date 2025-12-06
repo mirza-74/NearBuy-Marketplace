@@ -1,46 +1,63 @@
 <?php
 // ===============================================================
-// – Halaman Profil / Akun
+// NearBuy – Halaman Profil / Akun
 // ===============================================================
 declare(strict_types=1);
 
-$BASE = '/NearBuy-Marketplace/public';
+// BASE otomatis
+$scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+$BASE = rtrim($scriptDir, '/');
+if ($BASE === '' || $BASE === '/') {
+    $BASE = '/NearBuy-marketplace/public';
+}
 
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/settings.php';
 
-// pastikan user login
+// ---------------------------------------------------------------
+//  Pastikan user login (boleh: pengguna, seller, admin)
+// ---------------------------------------------------------------
 $user = $_SESSION['user'] ?? null;
 $role = $user['role'] ?? 'guest';
-if (!$user || !in_array($role, ['pengguna','admin'], true)) {
-    header('Location: '.$BASE.'/login.php?next='.urlencode($BASE.'/profil.php'));
+
+if (
+    !$user ||
+    !in_array($role, ['pengguna', 'seller', 'admin'], true)
+) {
+    header('Location: ' . $BASE . '/login.php?next=' . urlencode($BASE . '/profil.php'));
     exit;
 }
+
 $userId = (int)$user['id'];
 
 // CSS khusus profil
-$EXTRA_CSS = ['style-profil.css'];
+$EXTRA_CSS = $EXTRA_CSS ?? [];
+$EXTRA_CSS[] = 'style-profil.css';
 
-// header
+// header global
 require_once __DIR__ . '/../includes/header.php';
 
 // ---------- Helper gambar ----------
 if (!function_exists('upload_image_url')) {
     function upload_image_url(?string $path, string $BASE): string {
-        if (!$path) return 'https://via.placeholder.com/200x200?text=No+Image';
-        if (preg_match('~^https?://~i', $path)) return $path;
+        if (!$path) {
+            return 'https://via.placeholder.com/200x200?text=No+Image';
+        }
+        if (preg_match('~^https?://~i', $path)) {
+            return $path;
+        }
         $p = ltrim($path, '/');
         if (str_starts_with($p, 'products/')) {
-            return rtrim($BASE, '/').'/uploads/'.$p;
+            return rtrim($BASE, '/') . '/uploads/' . $p;
         }
         if (str_starts_with($p, 'uploads/')) {
-            return rtrim($BASE, '/').'/'.$p;
+            return rtrim($BASE, '/') . '/' . $p;
         }
         if (str_starts_with($p, 'public/uploads/')) {
-            return rtrim($BASE, '/').'/'.substr($p, 7);
+            return rtrim($BASE, '/') . '/' . substr($p, 7);
         }
-        return rtrim($BASE, '/').'/uploads/'.$p;
+        return rtrim($BASE, '/') . '/uploads/' . $p;
     }
 }
 
@@ -63,15 +80,14 @@ $stmt = $pdo->prepare("
 $stmt->execute([':uid' => $userId]);
 $cartQty = (int)$stmt->fetchColumn();
 
-// ---------- Cek apakah user sudah punya toko ----------
+// ---------- Cek apakah user sudah punya toko (shops) ----------
 $hasStore  = false;
 $storeName = '';
 
 try {
-    // sesuaikan nama tabel/kolom kalau nanti kamu pakai nama lain
     $stmtStore = $pdo->prepare("
         SELECT id, name 
-        FROM stores 
+        FROM shops 
         WHERE user_id = :uid 
         LIMIT 1
     ");
@@ -83,39 +99,43 @@ try {
         $storeName = (string)$rowStore['name'];
     }
 } catch (Throwable $e) {
-    // kalau tabel stores belum ada, jangan bikin error
+    // kalau tabel shops belum ada, jangan bikin error
     $hasStore  = false;
     $storeName = '';
 }
 
 // ---------- Rekomendasi produk ----------
 $rekom = [];
-$stmt = $pdo->prepare("
-    SELECT DISTINCT 
-      r.product_id AS id,
-      r.slug,
-      r.title,
-      r.price,
-      r.compare_price,
-      r.main_image
-    FROM v_user_recommendations r
-    WHERE r.user_id = :uid
-      AND r.stock > 0
-    ORDER BY r.popularity DESC, r.created_at DESC
-    LIMIT 8
-");
-$stmt->execute([':uid' => $userId]);
-$rekom = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-if (empty($rekom)) {
-    $stmt = $pdo->query("
-        SELECT id, slug, title, price, compare_price, main_image
-        FROM products
-        WHERE is_active=1 AND stock>0
-        ORDER BY popularity DESC, created_at DESC
+try {
+    $stmt = $pdo->prepare("
+        SELECT DISTINCT 
+          r.product_id AS id,
+          r.slug,
+          r.title,
+          r.price,
+          r.compare_price,
+          r.main_image
+        FROM v_user_recommendations r
+        WHERE r.user_id = :uid
+          AND r.stock > 0
+        ORDER BY r.popularity DESC, r.created_at DESC
         LIMIT 8
     ");
+    $stmt->execute([':uid' => $userId]);
     $rekom = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (empty($rekom)) {
+        $stmt = $pdo->query("
+            SELECT id, slug, title, price, compare_price, main_image
+            FROM products
+            WHERE is_active = 1 AND stock > 0
+            ORDER BY popularity DESC, created_at DESC
+            LIMIT 8
+        ");
+        $rekom = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+} catch (Throwable $e) {
+    $rekom = [];
 }
 
 // helper nama inisial
@@ -124,8 +144,6 @@ $initial  = mb_strtoupper(mb_substr($fullName !== '' ? $fullName : 'S', 0, 1));
 $email    = (string)($user['email'] ?? '');
 ?>
 <div class="profile-page">
-  <link rel="stylesheet" href="style-profil.css?v=3">
-
 
   <!-- KARTU ATAS PROFIL -->
   <section class="profile-hero">
@@ -162,7 +180,6 @@ $email    = (string)($user['email'] ?? '');
   <section class="profile-section">
     <div class="section-header">
       <h2>Transaksi</h2>
-      
       <a href="<?= e($BASE) ?>/transaksi.php" class="profile-edit-link">Lihat Semua</a>
     </div>
     <div class="profile-menu-grid">
@@ -226,9 +243,9 @@ $email    = (string)($user['email'] ?? '');
     <h2>Rekomendasi Untukmu</h2>
     <div class="rekom-grid">
       <?php foreach ($rekom as $p):
-        $img = upload_image_url($p['main_image'] ?? null, $BASE);
+        $img      = upload_image_url($p['main_image'] ?? null, $BASE);
         $hasPromo = (!is_null($p['compare_price']) && (float)$p['compare_price'] > (float)$p['price']);
-        $detailUrl = $BASE.'/detail_produk.php?slug='.urlencode($p['slug']);
+        $detailUrl = $BASE . '/detail_produk.php?slug=' . urlencode($p['slug']);
       ?>
       <div class="rekom-card">
         <a href="<?= e($detailUrl) ?>" class="rekom-link">

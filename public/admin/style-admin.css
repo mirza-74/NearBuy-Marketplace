@@ -1,0 +1,234 @@
+.admin-shell {
+  max-width: 1100px;
+  margin: 22px auto;
+  padding: 0 16px;
+}
+
+.admin-title {
+  margin-bottom: 8px;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.admin-subtitle {
+  color: #6b7280;
+  margin-top: 0;
+  margin-bottom: 18px;
+  font-size: 0.95rem;
+}
+
+.admin-flash {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f0fdf4;
+  color: #065f46;
+  margin-bottom: 14px;
+  border: 1px solid #bbf7d0;
+}
+
+/* Stats */
+.admin-stats {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+
+.admin-stat-card {
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #e6e9ef;
+  min-width: 160px;
+}
+
+.admin-stat-card .stat-number {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.admin-stat-card .stat-label {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* Section */
+.admin-section {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  margin-bottom: 8px;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.section-subtitle {
+  color: #6b7280;
+  font-size: 13px;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.section-empty {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+/* Shop list */
+.shop-list,
+.shop-request-list,
+.note-list {
+  display: grid;
+  gap: 10px;
+}
+
+.shop-card,
+.shop-request-card,
+.note-card {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #e6e9ef;
+  background: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.shop-main,
+.shop-request-main,
+.note-main {
+  flex: 1;
+}
+
+.shop-name {
+  font-weight: 700;
+}
+
+.shop-id {
+  font-size: 12px;
+  color: #6b7280;
+  margin-left: 4px;
+}
+
+.shop-owner {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.shop-address {
+  font-size: 13px;
+  color: #4b5563;
+  margin-top: 6px;
+}
+
+.shop-stats {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 6px;
+}
+
+.shop-coord {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 8px;
+}
+
+.shop-actions,
+.shop-request-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.inline-form {
+  display: inline-block;
+}
+
+/* Buttons */
+.btn {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-primary {
+  background: #1d4ed8;
+  color: #ffffff;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: #1e40af;
+}
+
+.btn-approve {
+  background: linear-gradient(90deg, #16a34a, #22c55e);
+  color: #ffffff;
+  border: none;
+}
+
+.btn-approve:hover {
+  background: linear-gradient(90deg, #15803d, #16a34a);
+}
+
+.btn-reject {
+  background: #ffffff;
+  border: 1px solid #f97373;
+  color: #b91c1c;
+}
+
+.btn-reject:hover {
+  background: #fef2f2;
+}
+
+/* Notes / transaksi */
+.note-card {
+  border: 1px solid #eef2ff;
+}
+
+.note-title {
+  font-weight: 700;
+}
+
+.note-sub {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.note-amount {
+  text-align: right;
+}
+
+.note-money {
+  font-weight: 700;
+}
+
+.note-date {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .shop-card,
+  .shop-request-card,
+  .note-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .shop-actions,
+  .shop-request-actions {
+    align-items: flex-start;
+    width: 100%;
+  }
+}

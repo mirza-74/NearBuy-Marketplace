@@ -1,7 +1,8 @@
 <?php
 declare(strict_types=1);
-// Endpoint: menyimpan pilihan paket untuk toko (bisa dipanggil dari admin/index.php)
-$BASE = '/NearBuy-marketplace/public';
+
+$scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+$BASE = preg_replace('~/admin$~', '', rtrim($scriptDir, '/'));
 
 require_once __DIR__ . '/../../includes/session.php';
 require_once __DIR__ . '/../../includes/db.php';

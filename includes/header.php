@@ -43,10 +43,13 @@ if (!empty($FORCE_GUEST_HEADER)) {
 // 🔥 Deteksi halaman toko.php
 // =======================================
 $currentFile = basename($_SERVER['SCRIPT_NAME'] ?? '');
-$isTokoPage = ($currentFile === 'toko.php');
+$isTokoPage  = ($currentFile === 'toko.php');
 
 // Jika halaman toko.php, tambahkan CSS toko secara otomatis
 if ($isTokoPage) {
+    if (!isset($EXTRA_CSS) || !is_array($EXTRA_CSS)) {
+        $EXTRA_CSS = [];
+    }
     $EXTRA_CSS[] = "seller/style-toko.css";
 }
 ?>
@@ -61,7 +64,6 @@ if ($isTokoPage) {
   <!-- CSS global -->
   <link rel="stylesheet" href="<?= e($BASE) ?>/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
 
   <!-- CSS tambahan (produk.php, toko.php, seller, dll) -->
   <?php
@@ -83,50 +85,38 @@ if ($isTokoPage) {
     <!-- Logo -->
     <div class="logo">
       <img src="<?= e($BASE) ?>/assets/logo_nearbuyheader.png" class="logo-img" alt="Logo NearBuy">
-      <span class="logo-text" style="font-weight:500px;">“Menghubungkan pelanggan dengan produk terdekat."</span>
+      <span class="logo-text" style="font-weight:500;">“Menghubungkan pelanggan dengan produk terdekat."</span>
     </div>
 
     <!-- Hamburger Mobile -->
-   <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="primary-nav">
-    <i class="fa-solid fa-bars-staggered"></i>
-</button>
-
+    <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="primary-nav">
+      <i class="fa-solid fa-bars-staggered"></i>
+    </button>
 
     <!-- NAV ROLE BASED -->
     <nav class="nav-links" id="primary-nav">
 
       <?php if ($role === 'guest'): ?>
 
-        
-    <?php if ($role === 'guest'): ?>
+        <a href="<?= e($BASE) ?>/index.php">
+          <i class="fa-solid fa-house"></i> <span>Home</span>
+        </a>
 
-  <a href="<?= e($BASE) ?>/index.php">
-      <i class="fa-solid fa-house"></i> <span>Home</span>
-  </a>
+        <a href="<?= e($BASE) ?>/tentang.php">
+          <i class="fa-solid fa-circle-info"></i> <span>Tentang</span>
+        </a>
 
-  <a href="<?= e($BASE) ?>/tentang.php">
-      <i class="fa-solid fa-circle-info"></i> <span>Tentang</span>
-  </a>
+        <a href="<?= e($BASE) ?>/kontak.php">
+          <i class="fa-solid fa-headset"></i> <span>Kontak</span>
+        </a>
 
-  <a href="<?= e($BASE) ?>/kontak.php">
-      <i class="fa-solid fa-headset"></i> <span>Kontak</span>
-  </a>
+        <a href="<?= e($BASE) ?>/register.php">
+          <i class="fa-solid fa-user-plus"></i> <span>Daftar</span>
+        </a>
 
-  <a href="<?= e($BASE) ?>/login.php" class="login-icon">
-      <i class="fa-solid fa-right-to-bracket"></i> <span>Login</span>
-  </a>
-
-<?php endif; ?>
-
-<a href="<?= e($BASE) ?>/register.php">
-    <i class="fa-solid fa-user-plus"></i> Daftar
-</a>
-
-<a href="<?= e($BASE) ?>/login.php">
-    <i class="fa-solid fa-right-to-bracket"></i> Login
-</a>
-
-        
+        <a href="<?= e($BASE) ?>/login.php" class="login-icon">
+          <i class="fa-solid fa-right-to-bracket"></i> <span>Login</span>
+        </a>
 
       <?php elseif ($role === 'pengguna'): ?>
 
@@ -139,11 +129,11 @@ if ($isTokoPage) {
 
       <?php elseif ($role === 'seller'): ?>
 
-        <a href="<?= e($BASE) ?>/seller/index.php">📊 Dashboard Toko</a>
-        <a href="<?= e($BASE) ?>/seller/produk.php">📦 Kelola Produk</a>
-        <a href="<?= e($BASE) ?>/seller/pesanan.php">🧾 Kelola Pesanan</a>
-        <a href="<?= e($BASE) ?>/seller/promo.php">🏷 Kelola Promo</a>
-        <a href="<?= e($BASE) ?>/seller/lokasi.php">📍 Lokasi Toko</a>
+        <a href="<?= e($BASE) ?>/index.php">Home</a>
+        <a href="<?= e($BASE) ?>/set_lokasi.php">📍 Set Lokasi</a>
+        <a href="<?= e($BASE) ?>/seller/toko.php">🏪 Toko Saya</a>
+        <a href="<?= e($BASE) ?>/keranjang.php">🛒 Keranjang</a>
+        <a href="<?= e($BASE) ?>/profil.php">👤 Profil</a>
         <a href="<?= e($BASE) ?>/logout.php" class="logout">Logout</a>
 
       <?php elseif ($role === 'admin'): ?>
