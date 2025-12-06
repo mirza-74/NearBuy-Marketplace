@@ -1,10 +1,10 @@
 <?php
 // ===============================================================
-// SellExa – Halaman Profil / Akun
+// – Halaman Profil / Akun
 // ===============================================================
 declare(strict_types=1);
 
-$BASE = '/Marketplace_SellExa/public';
+$BASE = '/NearBuy-Marketplace/public';
 
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/db.php';
@@ -123,6 +123,8 @@ $initial  = mb_strtoupper(mb_substr($fullName !== '' ? $fullName : 'S', 0, 1));
 $email    = (string)($user['email'] ?? '');
 ?>
 <div class="profile-page">
+  <link rel="stylesheet" href="style-profil.css?v=3">
+
 
   <!-- KARTU ATAS PROFIL -->
   <section class="profile-hero">

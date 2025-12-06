@@ -1,471 +1,250 @@
 /* =========================================================
-   NEARBUY– Profil / Akun Styles
+   NEARBUY – Profil / Akun Styles (Modern Soft Blue UI)
    ========================================================= */
 
 :root{
-  /* override dikit biar nyambung logo gradient */
-  --sx-grad-from:#1ea1ff;
-  --sx-grad-to:#7b3ff2;
-  --sx-soft:#eef4ff;
+  --bg-main: linear-gradient(145deg, #dff1ff, #b5d5ff, #84b8ff);
+  --accent:#3b82f6;
+  --accent-dark:#2563eb;
+  --text:#1e293b;
+  --soft:#f8fbff;
+  --shadow:0 8px 20px rgba(0,0,0,.06);
+  --radius:18px;
 }
 
+/* Wrapper */
 .profile-page{
   max-width:1200px;
-  margin:12px auto 32px;
+  margin:18px auto 40px;
   padding:0 16px 80px;
 }
 
-/* ---------- HERO PROFIL ATAS ---------- */
+/* -------- HERO (PROFILE CARD) -------- */
 .profile-hero{
-  background:linear-gradient(135deg,var(--sx-grad-from),var(--sx-grad-to));
-  border-radius:18px;
-  padding:16px 16px 14px;
-  color:#f9fafb;
-  box-shadow:0 10px 30px rgba(33,150,243,.25);
-  margin-bottom:18px;
+  background: var(--bg-main);
+  border-radius: 28px;
+  padding: 26px 20px;
+  color:#0f1b2e;
+  box-shadow:0 18px 40px rgba(0,80,150,0.12);
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin-bottom:24px;
+  position:relative;
+  overflow:hidden;
+  transition:.3s ease-in-out;
 }
 
+/* Glass Glow Highlight */
+.profile-hero::before{
+  content:"";
+  position:absolute;
+  top:-40px;
+  right:-40px;
+  width:180px;
+  height:180px;
+  background:rgba(255,255,255,0.45);
+  border-radius:50%;
+  filter:blur(50px);
+}
+
+/* Avatar */
 .profile-hero-inner{
   display:flex;
   align-items:center;
-  gap:12px;
+  gap:18px;
 }
 
 .profile-avatar{
-  width:52px;
-  height:52px;
+  width:65px;
+  height:65px;
   border-radius:50%;
-  background:rgba(255,255,255,.14);
+  background:white;
   display:flex;
-  align-items:center;
   justify-content:center;
-  font-weight:800;
-  font-size:1.2rem;
-  color:#f9fafb;
-}
-
-.profile-avatar span{
-  transform:translateY(1px);
-}
-
-.profile-main-info{
-  flex:1;
-  min-width:0;
-}
-
-.profile-name{
+  align-items:center;
   font-weight:700;
-  font-size:1.05rem;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  font-size:22px;
+  color:var(--accent-dark);
+  border:3px solid rgba(255,255,255,.6);
+  box-shadow:0 6px 18px rgba(0,0,0,.08);
+  transition:.2s;
+}
+
+.profile-avatar:hover{
+  transform:scale(1.05);
+}
+
+/* User Info */
+.profile-name{
+  font-size:1.25rem;
+  font-weight:700;
 }
 
 .profile-email{
-  font-size:.85rem;
-  opacity:.9;
-  margin-top:2px;
+  font-size:.9rem;
+  opacity:.7;
+  margin-top:3px;
 }
 
+/* Edit button */
 .profile-edit-link{
-  display:inline-flex;
-  align-items:center;
-  gap:4px;
   margin-top:6px;
-  padding:6px 10px;
+  display:inline-flex;
+  padding:7px 14px;
   border-radius:999px;
-  border:1px solid rgba(255,255,255,.6);
+  background:white;
+  color:var(--accent-dark);
   font-size:.8rem;
-  color:#f9fafb;
+  border:1px solid #dbeafe;
+  transition:.2s;
   text-decoration:none;
 }
+
 .profile-edit-link:hover{
-  background:rgba(255,255,255,.12);
+  background:var(--accent-dark);
+  color:#fff;
 }
 
-/* bar statistik */
+/* Stats Row */
 .profile-stat-row{
-  margin-top:12px;
-  padding-top:10px;
-  border-top:1px solid rgba(255,255,255,.25);
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:10px;
-}
-
-.profile-stat-item{
+  display:flex;
+  justify-content:space-around;
   text-align:center;
+  padding-top:14px;
+  margin-top:10px;
+  border-top:1px solid rgba(255,255,255,.35);
 }
 
 .stat-label{
-  font-size:.75rem;
-  opacity:.85;
+  font-size:.78rem;
+  opacity:.65;
 }
 
 .stat-value{
-  margin-top:2px;
+  font-size:1.15rem;
   font-weight:700;
-  font-size:.95rem;
+  color:#003b97;
 }
 
-/* ---------- SECTION UMUM ---------- */
+
+/* -------- SECTIONS -------- */
 .profile-section{
-  background:#ffffff;
-  border-radius:16px;
-  padding:14px 14px 12px;
-  box-shadow:0 6px 18px rgba(15,23,42,.04);
-  border:1px solid #e5e7eb;
-  margin-bottom:14px;
+  background:linear-gradient(145deg, #e9f4ff, #d5e9ff);
+  padding:18px;
+  border-radius:22px;
+  border:1px solid #bcd9ff;
+  box-shadow:0 6px 18px rgba(0,0,0,.05);
+  margin-bottom:18px;
+  transition:.25s ease;
+}
+
+.profile-section:hover{
+  transform:translateY(-3px);
+  box-shadow:0 12px 28px rgba(0,0,0,.1);
 }
 
 .profile-section h2{
-  margin:0 0 8px;
-  font-size:1rem;
-  color:#0f172a;
+  font-size:1.05rem;
+  font-weight:700;
+  color:var(--text);
+  margin-bottom:10px;
 }
 
-.section-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:8px;
-  margin-bottom:6px;
-}
-
-.section-header h2{
-  margin:0;
-}
-
-.section-link{
-  font-size:.82rem;
-  color:var(--brand,#1e40af);
-  text-decoration:none;
-}
-.section-link:hover{
-  text-decoration:underline;
-}
-
-/* ---------- MENU GRID ---------- */
+/* -------- MENU GRID -------- */
 .profile-menu-grid{
   display:grid;
-  grid-template-columns:repeat(5,minmax(0,1fr));
-  gap:6px;
-  margin-top:6px;
-}
-
-.profile-menu-grid.more{
-  grid-template-columns:repeat(4,minmax(0,1fr));
+  grid-template-columns:repeat(auto-fit, minmax(120px,1fr));
+  gap:12px;
 }
 
 .profile-menu-item{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:flex-start;
-  gap:4px;
-  padding:8px 4px;
-  border-radius:12px;
+  background:white;
+  border-radius:14px;
+  padding:14px;
+  text-align:center;
+  color:var(--accent-dark);
   text-decoration:none;
-  background:#f9fafb;
-  color:#688ce0;
-  font-size:.78rem;
-  transition:background .15s ease, transform .15s ease, box-shadow .15s ease;
+  transition:.3s;
+  border:1px solid #e0edff;
 }
 
 .profile-menu-item:hover{
-  background:#eef2ff;
-  transform:translateY(-1px);
-  box-shadow:0 4px 10px rgba(148,163,184,.25);
+  background:#f8fbff;
+  transform:translateY(-5px);
+  box-shadow:var(--shadow);
 }
 
+/* Icons */
 .menu-icon{
-  width:30px;
-  height:30px;
+  width:40px;
+  height:40px;
+  border-radius:12px;
+  background:#e9f4ff;
   display:flex;
-  align-items:center;
   justify-content:center;
-  font-size:.85rem;
+  align-items:center;
+  font-size:1.2rem;
+  margin-bottom:6px;
+  border:1px solid #bedaff;
 }
 
-/* circle icons (transaksi) */
-.menu-icon.circle{
-  border-radius:999px;
-  background:#e0edff;
-  color:#1d4ed8;
-  font-weight:700;
-}
 
-/* square icons (menu lainnya) */
-.menu-icon.square{
-  border-radius:10px;
-  background:#e5e7eb;
-}
-
-/* kecilkan warna beda-beda dikit kalau mau */
-.menu-icon.wait{ background:#fee2e2; color:#b91c1c; }
-.menu-icon.process{ background:#fef9c3; color:#a16207; }
-.menu-icon.ship{ background:#e0f2fe; color:#0369a1; }
-.menu-icon.done{ background:#dcfce7; color:#166534; }
-.menu-icon.review{ background:#fef3c7; color:#92400e; }
-
-.menu-text{
-  text-align:center;
-  line-height:1.25;
-}
-
-/* ---------- REKOMENDASI PRODUK ---------- */
+/* -------- PRODUCT REKOM -------- */
 .rekom-grid{
   display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:10px;
-  margin-top:8px;
+  grid-template-columns:repeat(auto-fit, minmax(160px,1fr));
+  gap:14px;
 }
 
 .rekom-card{
-  background:#f9fafb;
-  border-radius:12px;
-  border:1px solid #e5e7eb;
+  background:white;
+  border-radius:14px;
   overflow:hidden;
-  box-shadow:0 3px 12px rgba(15,23,42,.04);
-  transition:transform .15s ease, box-shadow .15s ease;
+  border:1px solid #e5e7eb;
+  transition:.25s;
 }
 
 .rekom-card:hover{
-  transform:translateY(-2px);
-  box-shadow:0 8px 20px rgba(15,23,42,.12);
-}
-
-.rekom-link{
-  display:block;
-  color:inherit;
-  text-decoration:none;
+  box-shadow:var(--shadow);
+  transform:translateY(-3px);
 }
 
 .rekom-img{
   width:100%;
   height:130px;
   object-fit:cover;
-  background:#e5e7eb;
 }
 
 .rekom-title{
-  margin:8px 8px 4px;
-  font-size:.8rem;
-  height:32px;
+  font-size:.85rem;
+  font-weight:600;
+  margin:8px;
+  height:36px;
   overflow:hidden;
 }
 
 .rekom-price{
+  padding:0 10px 10px;
   display:flex;
+  gap:6px;
   align-items:center;
-  gap:4px;
-  padding:0 8px 8px;
 }
 
 .rekom-price-current{
   font-weight:700;
-  font-size:.85rem;
-  color:#111827;
+  color:var(--accent-dark);
 }
 
 .rekom-price-compare{
   font-size:.75rem;
-  color:#9ca3af;
+  color:#94a3b8;
   text-decoration:line-through;
 }
 
-/* ---------- RESPONSIVE ---------- */
-@media (max-width: 900px){
-  .profile-page{
-    padding:0 12px 80px;
-  }
-
-  .profile-menu-grid{
-    grid-template-columns:repeat(4,minmax(0,1fr));
-  }
-  .profile-menu-grid.more{
-    grid-template-columns:repeat(3,minmax(0,1fr));
-  }
-
-  .rekom-grid{
-    grid-template-columns:repeat(3,minmax(0,1fr));
-  }
-}
-
-@media (max-width: 640px){
-  .profile-hero{
-    padding:14px 12px 12px;
-  }
+/* -------- Responsive -------- */
+@media(max-width:600px){
   .profile-avatar{
-    width:46px;
-    height:46px;
-    font-size:1.05rem;
+    width:50px;height:50px;font-size:1rem;
   }
-  .profile-name{
-    font-size:.98rem;
-  }
-  .profile-email{
-    font-size:.78rem;
-  }
-
-  .profile-stat-row{
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:6px;
-  }
-
-  .profile-menu-grid{
-    grid-template-columns:repeat(4,minmax(0,1fr));
-  }
-  .profile-menu-grid.more{
-    grid-template-columns:repeat(3,minmax(0,1fr));
-  }
-
-  .rekom-grid{
-    grid-template-columns:repeat(2,minmax(0,1fr));
-  }
-}
-
-@media (max-width: 420px){
-  .profile-menu-grid{
-    grid-template-columns:repeat(3,minmax(0,1fr));
-  }
-  .profile-menu-grid.more{
-    grid-template-columns:repeat(3,minmax(0,1fr));
-  }
-}
-
-/* ===== Transaksi Page ===== */
-.transaksi-page {
-  max-width: 960px;
-  margin: 0 auto 40px;
-}
-
-.transaksi-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.transaksi-tab {
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: 1px solid #ddd;
-  font-size: 13px;
-  text-decoration: none;
-  color: #333;
-  background: #fff;
-}
-
-.transaksi-tab.active {
-  background: #0d6efd;
-  border-color: #0d6efd;
-  color: #fff;
-}
-
-.transaksi-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.transaksi-card {
-  border-radius: 10px;
-  border: 1px solid #eee;
-  padding: 10px 12px;
-  background: #fff;
-}
-
-.transaksi-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-}
-
-.transaksi-card-title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.transaksi-order-id {
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.transaksi-card-date {
-  font-size: 12px;
-  color: #777;
-}
-
-.transaksi-card-body {
-  font-size: 13px;
-  margin-bottom: 6px;
-}
-
-.transaksi-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 2px 0;
-}
-
-.transaksi-card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 12px;
-  color: #666;
-}
-
-.btn-small {
-  padding: 4px 10px;
-  border-radius: 6px;
-  border: 1px solid #0d6efd;
-  color: #0d6efd;
-  text-decoration: none;
-  font-size: 12px;
-}
-
-.btn-small:hover {
-  background: #0d6efd;
-  color: #fff;
-}
-
-.flash-info {
-  margin: 10px 0;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid #bbf7d0;
-  background: #ecfdf5;
-  color: #166534;
-  font-size: 0.9rem;
-}
-
-.transaksi-actions {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.btn-small {
-  display: inline-block;
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: none;
-  font-size: 0.85rem;
-  cursor: pointer;
-}
-
-.btn-primary {
-  background: #4f46e5;
-  color: #fff;
-}
-
-.btn-primary:hover {
-  background: #4338ca;
-}
-
-.transaksi-note {
-  font-size: 0.85rem;
-  color: #6b7280;
 }
