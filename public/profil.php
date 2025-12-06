@@ -56,8 +56,9 @@ $voucherCount = (int)$stmt->fetchColumn();
 $stmt = $pdo->prepare("
     SELECT COALESCE(SUM(ci.qty),0) 
     FROM carts c 
-    JOIN cart_items ci ON ci.cart_id = c.id
-    WHERE c.user_id = :uid AND c.status = 'active'
+    LEFT JOIN cart_items ci ON ci.cart_id = c.id
+    WHERE c.user_id = :uid 
+      AND (c.status IS NULL OR c.status = 'active')
 ");
 $stmt->execute([':uid' => $userId]);
 $cartQty = (int)$stmt->fetchColumn();
@@ -133,7 +134,7 @@ $email    = (string)($user['email'] ?? '');
         <span><?= e($initial) ?></span>
       </div>
       <div class="profile-main-info">
-        <div class="profile-name"><?= e($fullName ?: 'Pengguna SellExa') ?></div>
+        <div class="profile-name"><?= e($fullName ?: 'Pengguna Nearbuy') ?></div>
         <?php if ($email): ?>
           <div class="profile-email"><?= e($email) ?></div>
         <?php endif; ?>
@@ -193,7 +194,7 @@ $email    = (string)($user['email'] ?? '');
     <div class="profile-menu-grid more">
 
       <!-- BUKA TOKO / TOKO SAYA -->
-      <a href="<?= e($BASE) ?>/buka_toko.php" class="profile-menu-item">
+      <a href="<?= e($BASE) ?>/seller/toko.php" class="profile-menu-item">
         <div class="menu-icon square"><?= $hasStore ? '🏪' : '🏬' ?></div>
         <div class="menu-text">
           <?= $hasStore ? 'Toko Saya' : 'Buka Toko' ?>

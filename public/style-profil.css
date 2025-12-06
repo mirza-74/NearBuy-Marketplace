@@ -157,6 +157,10 @@
   grid-template-columns:repeat(auto-fit, minmax(120px,1fr));
   gap:12px;
 }
+.profile-menu-grid {
+  justify-items: center;
+}
+
 
 .profile-menu-item{
   background:white;

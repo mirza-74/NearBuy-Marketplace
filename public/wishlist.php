@@ -1,10 +1,10 @@
 <?php
 // ===============================================================
-// SellExa – Wishlist Sederhana (list produk yang disimpan user)
+//  – Wishlist Sederhana (list produk yang disimpan user)
 // ===============================================================
 declare(strict_types=1);
 
-$BASE = '/Marketplace_SellExa/public';
+$BASE = '/NearBuy-Marketplace/public';
 
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/db.php';

@@ -1,10 +1,10 @@
 <?php
 // ===============================================================
-// SellExa – Riwayat Transaksi / Pesanan User
+// Riwayat Transaksi / Pesanan User
 // ===============================================================
 declare(strict_types=1);
 
-$BASE = '/Marketplace_SellExa/public';
+$BASE = '/NearBuy-Marketplace/public';
 
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/db.php';
@@ -62,7 +62,8 @@ $sql = "
         o.total_items,
         o.payment_method
     FROM orders o
-    WHERE o.user_id = ?
+    WHERE o.user_id = ? AND o.is_real = 1
+
 ";
 $params = [$userId];
 
@@ -106,7 +107,7 @@ $initial  = mb_strtoupper(mb_substr($fullName !== '' ? $fullName : 'S', 0, 1));
         <span><?= e($initial) ?></span>
       </div>
       <div class="profile-main-info">
-        <div class="profile-name"><?= e($fullName ?: 'Pengguna SellExa') ?></div>
+        <div class="profile-name"><?= e($fullName ?: 'Pengguna nea') ?></div>
         <div class="profile-email"><?= e($user['email'] ?? '') ?></div>
       </div>
     </div>
@@ -137,7 +138,7 @@ $initial  = mb_strtoupper(mb_substr($fullName !== '' ? $fullName : 'S', 0, 1));
         </a>
       <?php endforeach; ?>
     </div>
-
+  <link rel="stylesheet" href="style-profil.css?v=3">
     <!-- pesan sukses misalnya dari konfirmasi pesanan -->
     <?php if (!empty($_GET['msg'])): ?>
       <div class="flash-info">
@@ -195,11 +196,11 @@ $initial  = mb_strtoupper(mb_substr($fullName !== '' ? $fullName : 'S', 0, 1));
                 </form>
               <?php elseif ($o['status'] === 'selesai'): ?>
                 <span class="transaksi-note">
-                  Pesanan sudah selesai. Terima kasih sudah berbelanja di SellExa 💜
+                  Pesanan sudah selesai. Terima kasih sudah berbelanja di NearBuy 💜
                 </span>
               <?php else: ?>
                 <span class="transaksi-note">
-                  Terima kasih sudah berbelanja di SellExa 💜
+                  Terima kasih sudah berbelanja di NearBuy 💜
                 </span>
               <?php endif; ?>
             </div>

@@ -1,10 +1,10 @@
 <?php
 // ===============================================================
-// SellExa – Toggle Wishlist (tambah / hapus produk dari wishlist)
+//  – Toggle Wishlist (tambah / hapus produk dari wishlist)
 // ===============================================================
 declare(strict_types=1);
 
-$BASE = '/Marketplace_SellExa/public';
+$BASE = '/NearBuy-Marketplace/public';
 
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/db.php';

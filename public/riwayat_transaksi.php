@@ -1,10 +1,10 @@
 <?php
 // ===============================================================
-// SellExa – Riwayat Transaksi (Customer)
+//  – Riwayat Transaksi (Customer)
 // ===============================================================
 declare(strict_types=1);
 
-$BASE = '/Marketplace_SellExa/public';
+$BASE = '/Nearbuy-Marketplace/public';
 
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/db.php';
@@ -182,7 +182,7 @@ function rt_status_badge_class(string $status): string {
   <section class="profile-section">
     <?php if (empty($orders)): ?>
       <div class="riwayat-empty">
-        Belum ada transaksi yang tercatat. Yuk mulai belanja di SellExa 💜
+        Belum ada transaksi yang tercatat. Yuk mulai belanja di NearBuy!
       </div>
     <?php else: ?>
       <div class="riwayat-list">

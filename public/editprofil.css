@@ -1,0 +1,207 @@
+/* ===================================
+   1. LAYOUT UTAMA & PENGATURAN GLOBAL
+   =================================== */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f8f8; /* Warna latar belakang yang lembut */
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Container utama untuk layout dua kolom */
+.page-wrap {
+    display: flex;
+    max-width: 1200px;
+    margin: 30px auto; /* Margin di atas dan bawah, auto di samping */
+    padding: 0 15px;
+    gap: 30px; /* Jarak antar kolom */
+}
+
+/* Area Konten Utama */
+.content {
+    flex: 3; /* Ambil 3/4 ruang */
+    min-width: 0;
+}
+
+/* Sidebar (Navigasi) */
+.sidebar {
+    flex: 1; /* Ambil 1/4 ruang */
+    min-width: 250px;
+}
+
+/* Pengaturan Responsif */
+@media (max-width: 900px) {
+    .page-wrap {
+        flex-direction: column; /* Kolom menjadi satu tumpukan */
+        margin-top: 20px;
+    }
+    .sidebar {
+        order: -1; /* Pindahkan sidebar ke atas (di bawah header) */
+        min-width: 100%;
+    }
+}/* ===================================
+   2. CARD (Kotak Konten)
+   =================================== */
+.card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0; /* Border lebih lembut */
+    border-radius: 12px; /* Sudut lebih membulat */
+    padding: 25px; /* Padding lebih besar */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Bayangan lembut */
+    transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08); /* Bayangan sedikit lebih kuat saat di-hover */
+}
+
+.card h4 {
+    color: #0d9488; /* Warna Teal untuk judul */
+    border-bottom: 2px solid #e6fffa; /* Garis bawah tipis */
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}/* ===================================
+   3. FORMULIR DAN INPUT
+   =================================== */
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #4b5563; /* Gray-600 */
+    font-size: 0.95rem;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group textarea {
+    width: 100%;
+    padding: 12px; /* Padding ditingkatkan */
+    border: 1px solid #d1d5db; /* Border lebih gelap */
+    border-radius: 8px; /* Sudut sedikit lebih membulat */
+    box-sizing: border-box;
+    font-size: 1rem;
+    color: #374151; /* Warna teks gelap */
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #0d9488; /* Teal-600 saat fokus */
+    box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2); /* Efek bayangan fokus */
+    outline: none;
+}
+
+.form-group input[readonly],
+.form-group input[disabled] {
+    background-color: #f3f4f6;
+    color: #9ca3af; /* Gray-400 untuk teks disabled */
+    cursor: not-allowed;
+}
+
+.error-text {
+    color: #ef4444; /* Merah untuk error */
+    font-size: 0.85rem;
+    margin-top: 5px;
+}/* ===================================
+   4. TOMBOL
+   =================================== */
+.button {
+    padding: 12px 25px; /* Padding ditingkatkan */
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700; /* Lebih tebal */
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s, transform 0.1s;
+    font-size: 1rem;
+    margin-right: 10px; /* Jarak antar tombol */
+}
+
+.button-primary {
+    background-color: #0d9488; /* Teal Utama */
+    color: white;
+}
+
+.button-primary:hover {
+    background-color: #0f766e;
+    transform: translateY(-1px); /* Efek sedikit naik saat di-hover */
+}
+
+.button-danger {
+    background-color: #dc2626; /* Merah untuk aksi berbahaya (Ganti Password) */
+    color: white;
+}
+
+.button-danger:hover {
+    background-color: #b91c1c;
+    transform: translateY(-1px);
+}/* ===================================
+   5. FLASH MESSAGE (Notifikasi)
+   =================================== */
+.flash-message {
+    padding: 15px; 
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-weight: 600;
+    border: 1px solid;
+}
+
+/* Style untuk pesan sukses (type 'success') */
+.flash-message.success {
+    background: #d1e7dd; /* Light Green */
+    color: #0f5132;    /* Dark Green Text */
+    border-color: #badbcc;
+}
+
+/* Style untuk pesan error (type 'error') */
+.flash-message.error {
+    background: #f8d7da; /* Light Red */
+    color: #842029;    /* Dark Red Text */
+    border-color: #f5c2c7;
+}
+
+/* ===================================
+   6. SIDEBAR NAVIGASI
+   =================================== */
+.sidebar-nav-card {
+    padding: 15px; /* Sedikit lebih kecil dari card utama */
+}
+
+.sidebar-nav-list {
+    list-style: none; 
+    padding: 0; 
+    margin: 8px 0 0 0;
+}
+
+.sidebar-nav-list li {
+    margin-bottom: 4px;
+}
+
+.sidebar-nav-list a {
+    display: block; /* Agar bisa diklik di seluruh area li */
+    padding: 6px 10px;
+    text-decoration: none;
+    color: #4b5563;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+
+.sidebar-nav-list a:hover {
+    background-color: #f3f4f6; /* Latar belakang abu-abu saat di-hover */
+}
+
+/* Style untuk link yang sedang aktif */
+.sidebar-nav-list a.active-link {
+    font-weight: bold; 
+    color: #0d9488; /* Warna teal */
+    background-color: #e6fffa; /* Latar belakang teal sangat muda */
+}
