@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 06, 2025 at 09:52 PM
+-- Generation Time: Dec 04, 2025 at 04:53 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -316,21 +316,15 @@ CREATE TABLE `shops` (
   `description` text DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
-  `package_code` varchar(20) DEFAULT NULL,
-  `package_status` enum('none','waiting_payment','active','expired') NOT NULL DEFAULT 'none',
-  `package_started_at` datetime DEFAULT NULL,
-  `package_expires_at` datetime DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `shops`
 --
 
-INSERT INTO `shops` (`id`, `user_id`, `name`, `address`, `latitude`, `longitude`, `description`, `is_active`, `created_at`, `updated_at`, `package_code`, `package_status`, `package_started_at`, `package_expires_at`) VALUES
-(1, 3, 'Toko Contoh NearBuy', 'Pangkalpinang', -2.1291000, 106.1090000, 'Toko contoh kebutuhan harian di sekitar Pangkalpinang', 1, '2025-12-01 17:46:36', NULL, NULL, 'none', NULL, NULL),
-(2, 4, 'Warung Rama', 'Pangkalpinang', -2.1291000, 106.1090000, 'Menyediakan Pulsa, Token Listrik, Isi Ulang Paket Internet dan kebutuhan smartphone Anda', 1, '2025-12-06 07:14:34', '2025-12-06 19:43:33', NULL, 'none', NULL, NULL),
-(3, 6, 'OKTAHIS', 'Jl Brig Hasan Basri Kec Amuntai Tengan Kab. HSU', -999.9999999, -999.9999999, 'Menjual perlatan HP dan Laptop serta Jasa Perbaikan', 0, '2025-12-06 19:11:33', '2025-12-06 19:42:07', NULL, 'none', NULL, NULL);
+INSERT INTO `shops` (`id`, `user_id`, `name`, `address`, `latitude`, `longitude`, `description`, `is_active`, `created_at`, `updated_at`) VALUES
+(1, 3, 'Toko Contoh NearBuy', 'Pangkalpinang', -2.1291000, 106.1090000, 'Toko contoh kebutuhan harian di sekitar Pangkalpinang', 1, '2025-12-01 17:46:36', NULL);
 
 -- --------------------------------------------------------
 
@@ -348,7 +342,6 @@ CREATE TABLE `site_settings` (
 --
 
 INSERT INTO `site_settings` (`key`, `value`) VALUES
-('home_banner', '/NearBuy/public/assets/banner-nearbuy.jpg'),
 ('home_banner', '/NearBuy/public/assets/banner-nearbuy.jpg');
 
 -- --------------------------------------------------------
@@ -399,11 +392,7 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `full_name`, `email`, `phone`, `gender`, `birth_date`, `address`, `city`, `province`, `postal_code`, `password_hash`, `role`, `is_active`, `created_at`, `updated_at`, `points`, `latitude`, `longitude`) VALUES
 (1, 'Administrator', 'admin@nearbuy.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'admin123', 'admin', 1, '2025-12-01 17:10:04', NULL, 0, NULL, NULL),
-(2, 'Mirza', 'mirza123@gmail.com', '0834567878', 'female', NULL, NULL, 'Pangkalpinang', NULL, NULL, '$2y$10$lRS6jJL8t/ItRYrbkZf0Vufgfk68BXsw1oTz9DixxQr3c8lSME5r6', 'pengguna', 1, '2025-12-03 14:43:33', NULL, 0, NULL, NULL),
-(3, 'Miru', 'miru@gmail.com', '085369410097', NULL, NULL, NULL, '-', NULL, NULL, '$2y$10$TDhdRJdG6I6XcSoXm5Q2CedXhGlS9gzajQ9bsyPsmJikB1jadv19a', 'pengguna', 1, '2025-12-05 16:04:46', NULL, 0, NULL, NULL),
-(4, 'Ramama', 'Ramama@gmail.com', '085369410097', 'male', '2002-05-22', 'Jl. Melati', 'gabek', 'Bangka Belitung', '45677', '$2y$10$MhhrQAQXYkF7xOHjRslDpeACFHnKVxH1XoEYBSmx324F24Dqc1Jqm', 'seller', 1, '2025-12-05 16:58:22', '2025-12-06 19:38:42', 0, -2.9655040, 104.7396352),
-(5, 'Admin', 'Admin123@gmail.com', '08879874982', 'female', NULL, 'Jl Bukit Tani', 'Pangkalpinang', 'Bangka Belitung', '45677', '$2y$10$iKnrRirrT66NFteWXOpMrOON.Kr.iWNCEd030C1t/CPVhYxGMUm6S', 'admin', 1, '2025-12-06 17:00:57', NULL, 0, NULL, NULL),
-(6, 'Okta', 'okta123@gmail.com', '085369410097', 'male', '2004-10-31', '-', '-', '-', '45677', '$2y$10$9qT7OmtTpKYYuN0TkrBdpe2R3e6BAU5.ICRogGrJFvz7L9TEG7cvm', 'pengguna', 1, '2025-12-06 19:07:23', NULL, 0, NULL, NULL);
+(2, 'Mirza', 'mirza123@gmail.com', '0834567878', 'female', NULL, NULL, 'Pangkalpinang', NULL, NULL, '$2y$10$lRS6jJL8t/ItRYrbkZf0Vufgfk68BXsw1oTz9DixxQr3c8lSME5r6', 'pengguna', 1, '2025-12-03 14:43:33', NULL, 0, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -425,65 +414,7 @@ INSERT INTO `user_preferences` (`user_id`, `category_id`) VALUES
 (2, 11),
 (3, 1),
 (3, 10),
-(3, 11),
-(2, 1),
-(2, 11),
-(3, 1),
-(3, 10),
 (3, 11);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `vouchers`
---
-
-CREATE TABLE `vouchers` (
-  `id` int(11) NOT NULL,
-  `code` varchar(50) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `discount_type` enum('percent','fixed') NOT NULL,
-  `discount_value` decimal(10,2) NOT NULL,
-  `min_purchase` decimal(10,2) DEFAULT 0.00,
-  `max_discount` decimal(10,2) DEFAULT NULL,
-  `start_date` date NOT NULL,
-  `end_date` date NOT NULL,
-  `is_active` tinyint(1) DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `voucher_claims`
---
-
-CREATE TABLE `voucher_claims` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `voucher_id` int(11) NOT NULL,
-  `claimed_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `status` enum('claimed','used','expired') DEFAULT 'claimed'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Stand-in structure for view `v_user_recommendations`
--- (See below for the actual view)
---
-CREATE TABLE `v_user_recommendations` (
-`user_id` int(11)
-,`product_id` int(11)
-,`slug` varchar(220)
-,`title` varchar(255)
-,`price` decimal(12,2)
-,`compare_price` decimal(12,2)
-,`main_image` varchar(255)
-,`stock` int(11)
-,`popularity` int(11)
-,`created_at` timestamp
-,`category_name` varchar(120)
-);
 
 -- --------------------------------------------------------
 
@@ -503,17 +434,7 @@ CREATE TABLE `wishlists` (
 --
 
 INSERT INTO `wishlists` (`id`, `user_id`, `product_id`, `created_at`) VALUES
-(1, 2, 1, '2025-11-28 11:30:00'),
 (1, 2, 1, '2025-11-28 11:30:00');
-
--- --------------------------------------------------------
-
---
--- Structure for view `v_user_recommendations`
---
-DROP TABLE IF EXISTS `v_user_recommendations`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_user_recommendations`  AS SELECT `u`.`id` AS `user_id`, `p`.`id` AS `product_id`, `p`.`slug` AS `slug`, `p`.`title` AS `title`, `p`.`price` AS `price`, `p`.`compare_price` AS `compare_price`, `p`.`main_image` AS `main_image`, `p`.`stock` AS `stock`, `p`.`popularity` AS `popularity`, `p`.`created_at` AS `created_at`, `c`.`name` AS `category_name` FROM ((((`users` `u` join `user_preferences` `up` on(`up`.`user_id` = `u`.`id`)) join `product_categories` `pc` on(`pc`.`category_id` = `up`.`category_id`)) join `products` `p` on(`p`.`id` = `pc`.`product_id`)) join `categories` `c` on(`c`.`id` = `up`.`category_id`)) WHERE `p`.`is_active` = 11 ;
 
 --
 -- Indexes for dumped tables
@@ -597,12 +518,6 @@ ALTER TABLE `product_reviews`
   ADD KEY `idx_order` (`order_id`);
 
 --
--- Indexes for table `shops`
---
-ALTER TABLE `shops`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `transactions`
 --
 ALTER TABLE `transactions`
@@ -625,13 +540,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `shops`
---
-ALTER TABLE `shops`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `transactions`
@@ -643,7 +552,7 @@ ALTER TABLE `transactions`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Constraints for dumped tables
