@@ -128,7 +128,7 @@ require_once __DIR__ . '/../../includes/header.php';
           </button>
         <?php endif; ?>
 
-        <a class="nb-btn nb-btn-secondary" href="<?= e($BASE) ?>/set_lokasi.php">
+        <a class="nb-btn nb-btn-secondary" href="<?= e($BASE) ?>/seller/edit_toko.php">
           Atur Lokasi Toko
         </a>
       </div>
