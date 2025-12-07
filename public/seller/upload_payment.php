@@ -3,6 +3,54 @@
 // NearBuy – Halaman Unggah Bukti Pembayaran
 // File: /seller/upload_payment.php
 // ===============================================================
+declare(strict_types=1);
+
+// Includes Wajib
+require_once __DIR__ . '/../../includes/session.php';
+require_once __DIR__ . '/../../includes/db.php';
+
+// BASE: otomatis, buang "/seller" di ujung
+$scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+$BASE = preg_replace('~/seller$~', '', rtrim($scriptDir, '/'));
+
+// helper escape
+if (!function_exists('e')) {
+    function e(string $s): string {
+        return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+// ===============================================================
+// 1. VALIDASI LOGIN & AMBIL DATA TOKO
+// ===============================================================
+$user = $_SESSION['user'] ?? null;
+if (!$user || empty($user['id'])) {
+    header('Location: ' . $BASE . '/login.php');
+    exit;
+}
+$userId = (int)$user['id'];
+$shop = null;
+try {
+    $stmt = $pdo->prepare("SELECT id FROM shops WHERE user_id = ? LIMIT 1");
+    $stmt->execute([$userId]);
+    $shop = $stmt->fetch(PDO::FETCH_ASSOC);
+} catch (Throwable $e) {}
+
+// ===============================================================
+// 2. VALIDASI DATA PAKET PILIHAN (Dipastikan ada di sesi)
+// ===============================================================
+$package = $_SESSION['subscription_plan'] ?? null;
+$shopIdToSubscribe = $_SESSION['subscription_shop_id'] ?? null;
+
+if (!$package || !$shop || $shop['id'] !== $shopIdToSubscribe) {
+    // Jika tidak ada data paket di sesi, redirect kembali ke halaman pilih paket
+    header('Location: ' . $BASE . '/seller/pilih_paket.php');
+    exit;
+}
+
+// ===============================================================
+// 3. LOGIKA UNGGAH BUKTI BAYAR (Final)
+// ===============================================================
 $successMessage = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_FILES['bukti_bayar'])) {
     
@@ -23,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_FILES['bukti_bayar'])) {
         // --- Proses Upload File dan Update DB ---
         
         // 2. Definisikan folder tujuan upload
-        // Asumsi struktur: /public/uploads/payment_proofs/
+        // Lokasi folder: SCRIPT_ROOT/uploads/payment_proofs/
         $uploadDir = __DIR__ . '/../../uploads/payment_proofs/'; 
         
         if (!is_dir($uploadDir)) {
@@ -33,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_FILES['bukti_bayar'])) {
         
         // 3. Buat nama file unik: shopID_timestamp.ext
         $fileName = $shop['id'] . '_' . time() . '.' . $fileExt;
-        $filePathServer = $uploadDir . $fileName; 
+        $filePathServer = $uploadDir . $fileName; // Path absolut di server
         
         // Path Relatif untuk disimpan di DB (Path ini yang diakses Admin)
         $relativeFilePath = $BASE . '/uploads/payment_proofs/' . $fileName; 
@@ -41,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_FILES['bukti_bayar'])) {
         // 4. Pindahkan file
         if (move_uploaded_file($file['tmp_name'], $filePathServer)) {
             try {
-                // 5. Update Database: Menggunakan kolom 'last_payment_proof' dan 'package_code'
+                // 5. Update Database: Menyimpan path bukti dan nama paket
                 $stmt = $pdo->prepare("
                     UPDATE shops SET 
                         subscription_status = 'pending_payment',
@@ -53,14 +101,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_FILES['bukti_bayar'])) {
                 
                 $stmt->execute([
                     $relativeFilePath,      
-                    $package['name'],       // Kita simpan nama paket ke kolom package_code
+                    $package['name'],       // Menyimpan nama paket ke kolom package_code
                     $shop['id']
                 ]);
 
                 // Berhasil: hapus session dan tampilkan pesan sukses
                 unset($_SESSION['subscription_plan']);
                 unset($_SESSION['subscription_shop_id']);
-                $successMessage = 'Bukti pembayaran berhasil diunggah. Kami akan memprosesnya dalam 1x24 jam. Anda akan diarahkan kembali ke dashboard toko.';
+                $successMessage = 'Bukti pembayaran berhasil diunggah. Kami akan memprosesnya dalam 1x24 jam. Langganan Anda akan segera diaktifkan. Anda akan diarahkan kembali ke dashboard toko.';
                 header("Refresh: 5; url=" . $BASE . "/seller/toko.php");
 
             } catch (Throwable $e) {
@@ -71,12 +119,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_FILES['bukti_bayar'])) {
             }
         } else {
             // Error move file (izin folder)
-            $successMessage = 'Gagal memindahkan file ke server. Periksa izin folder (/uploads/payment_proofs/).';
+            $successMessage = 'Gagal memindahkan file ke server. Pastikan folder (/uploads/payment_proofs/) memiliki izin tulis (chmod 777).';
         }
     }
 }
-require_once __DIR__ . '/../../includes/header.php';
 
+// ===============================================================
+// HEADER DAN HTML
+// ===============================================================
+
+require_once __DIR__ . '/../../includes/header.php';
 ?>
 
 <link rel="stylesheet" href="style_seller.css"> 
@@ -91,11 +143,17 @@ require_once __DIR__ . '/../../includes/header.php';
             </p>
         <?php else: ?>
 
-            <p class="nb-sub">
-                Paket Pilihan: 
-                <b><?= e($package['name']) ?></b> 
-                (Rp<?= number_format($package['price'], 0, ',', '.') ?> / bulan)
-            </p>
+            <?php if ($package): // Pengecekan untuk menghindari Fatal Error jika sesi sudah terhapus ?>
+                <p class="nb-sub">
+                    Paket Pilihan: 
+                    <b><?= e($package['name'] ?? 'N/A') ?></b> 
+                    (Rp<?= number_format((float)($package['price'] ?? 0), 0, ',', '.') ?> / bulan)
+                </p>
+            <?php else: ?>
+                <p class="nb-sub" style="color: gray;">
+                    Informasi paket tidak ditemukan. Harap kembali ke halaman pilih paket.
+                </p>
+            <?php endif; ?>
 
             <p class="nb-sub">
                 Silakan transfer ke rekening berikut dan unggah bukti pembayarannya:
