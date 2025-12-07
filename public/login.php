@@ -18,7 +18,7 @@ if (!empty($_SESSION['user'])) {
         exit;
     } elseif ($role === 'seller') {
         // 🟢 PERBAIKAN 2: Arahkan Seller ke toko.php (Dashboard Toko)
-        header("Location: $BASE/seller/toko.php"); 
+        header("Location: $BASE/index.php"); 
         exit;
     } else {
         // Pengguna biasa
@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         header("Location: $BASE/admin/dashboard.php"); 
                     } elseif ($u['role'] === 'seller') {
                         // 🟢 PERBAIKAN 4: Arahkan Seller ke toko.php (Dashboard Toko)
-                        header("Location: $BASE/seller/toko.php"); 
+                        header("Location: $BASE/index.php"); 
                     } else {
                         // Pengguna/pembeli biasa
                         header("Location: $BASE/index.php");
