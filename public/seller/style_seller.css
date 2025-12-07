@@ -1,0 +1,170 @@
+/* ===============================================================
+   GAYA VISUAL KHUSUS SELLER PAGE (style_seller.css)
+   =============================================================== */
+
+/* Palet Warna NearBuy */
+:root {
+    --nb-primary: #1e3a8a; /* Biru Gelap Primer */
+    --nb-secondary: #3b82f6; /* Biru Terang Sekunder */
+    --nb-success: #10b981; /* Hijau untuk sukses */
+    --nb-text-dark: #1f2937;
+    --nb-text-light: #6b7280;
+    --nb-bg-light: #ffffff;
+    --nb-bg-extra-light: #f9fafb;
+}
+
+/* Pengaturan Body Dasar */
+body {
+    background-color: var(--nb-bg-extra-light);
+    color: var(--nb-text-dark);
+    font-family: Arial, sans-serif; /* Asumsi font default */
+}
+
+/* Gaya Card Utama (Pembayaran) */
+.nb-card {
+    background-color: var(--nb-bg-light);
+    border-radius: 16px; 
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); 
+}
+
+/* Gaya Tipografi */
+.nb-title {
+    color: var(--nb-primary);
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+.nb-sub {
+    color: var(--nb-text-light);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* ===============================================================
+   KOTAK BANK (EFEK GELEMBUNG)
+   =============================================================== */
+.nb-bank-box {
+    border: 1px solid #c8d3ec; 
+    padding: 25px; 
+    border-radius: 12px;
+    margin-bottom: 30px; 
+    background-color: #eef4ff; 
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); 
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.nb-bank-box:hover {
+    transform: translateY(-4px); 
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.bank-label {
+    margin: 0; 
+    color: var(--nb-text-light); 
+    font-size: 0.85rem;
+}
+
+.bank-detail {
+    margin: 5px 0 0; 
+    font-size: 22px; 
+    font-weight: 800; 
+    color: var(--nb-text-dark);
+}
+
+.bank-footer {
+    margin: 0; 
+    color: var(--nb-primary); 
+    font-weight: 600;
+}
+
+/* ===============================================================
+   FORM & TOMBOL
+   =============================================================== */
+
+/* Tombol Dasar */
+.nb-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-align: center;
+    transition: all 0.2s ease-in-out;
+    display: inline-block; /* Penting untuk tombol custom file */
+}
+
+.nb-btn-primary {
+    background-color: var(--nb-primary);
+    color: var(--nb-bg-light);
+    border: 1px solid var(--nb-primary);
+}
+
+.nb-btn-primary:hover {
+    background-color: #1a3378; 
+    box-shadow: 0 4px 10px rgba(96, 189, 255, 0.4);
+}
+
+.nb-action-full {
+    width: 100%; 
+    margin-top: 25px; 
+}
+
+/* Input File Custom (Tombol Pilih File) */
+.nb-label {
+    font-weight: 600;
+    color: var(--nb-text-dark);
+    margin-bottom: 8px;
+    display: block;
+}
+
+.file-input-wrapper {
+    margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.file-input-custom {
+    padding: 10px 20px;
+    background-color: var(--nb-secondary); /* Warna biru cerah */
+    color: var(--nb-bg-light);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    border: 1px solid var(--nb-secondary);
+}
+
+.file-input-custom:hover {
+    background-color: #316fc4;
+}
+
+/* Sembunyikan input file bawaan */
+.file-input-wrapper input[type="file"] {
+    opacity: 0;
+    position: absolute;
+    z-index: -1;
+    width: 0.1px;
+    height: 0.1px;
+}
+
+#file-name {
+    display: block;
+    margin-top: 10px;
+    color: var(--nb-text-light);
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+/* Pesan Sukses */
+.nb-success-msg {
+    color: var(--nb-success);
+    font-weight: 600; 
+    padding: 15px; 
+    border: 1px solid #99f6e4; 
+    background-color: #ecfdf5; 
+    border-radius: 8px;
+    text-align: center;
+}

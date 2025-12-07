@@ -28,24 +28,24 @@ if (!function_exists('e')) {
 }
 
 // ===============================================================
-// PROSES POST: SETUJUI / TOLAK TOKO
+// PROSES POST: SETUJUI / TOLAK TOKO & PEMBAYARAN
 // ===============================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $shopId = isset($_POST['shop_id']) ? (int)$_POST['shop_id'] : 0;
 
-    if ($shopId <= 0 || !in_array($action, ['approve_shop', 'reject_shop'], true)) {
+    if ($shopId <= 0 || !in_array($action, ['approve_shop', 'reject_shop', 'approve_payment', 'reject_payment'], true)) {
         $_SESSION['flash_admin'] = 'Permintaan tidak valid (action="' . $action . '", shop_id=' . $shopId . ').';
         header("Location: {$BASE}/admin/index.php");
         exit;
     }
 
-    // ====== SETUJUI TOKO ======
+    // ====== SETUJUI TOKO (Aktivasi) ======
     if ($action === 'approve_shop') {
         try {
             $pdo->beginTransaction();
 
-            // 1) Toko diaktifkan
+            // 1) Toko diaktifkan (is_active = 1)
             $stmt = $pdo->prepare("UPDATE shops SET is_active = 1 WHERE id = ? LIMIT 1");
             $stmt->execute([$shopId]);
 
@@ -88,6 +88,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: {$BASE}/admin/index.php");
         exit;
     }
+    
+    // ====== SETUJUI PEMBAYARAN LANGGANAN (ACC) ======
+    if ($action === 'approve_payment') {
+        try {
+            // Ubah status langganan menjadi 'active', hapus path bukti (opsional)
+            $stmt = $pdo->prepare("UPDATE shops SET subscription_status = 'active', updated_at = NOW() WHERE id = ? LIMIT 1");
+            $stmt->execute([$shopId]);
+
+            $_SESSION['flash_admin'] = "Pembayaran Toko ID {$shopId} berhasil disetujui. Langganan diaktifkan.";
+        } catch (Throwable $e) {
+            $_SESSION['flash_admin'] = "Gagal menyetujui pembayaran: " . $e->getMessage();
+        }
+
+        header("Location: {$BASE}/admin/index.php");
+        exit;
+    }
+    
+    // ====== TOLAK PEMBAYARAN LANGGANAN ======
+    if ($action === 'reject_payment') {
+        try {
+            // Ubah status langganan kembali menjadi 'free' (dan hapus path bukti opsional)
+            $stmt = $pdo->prepare("UPDATE shops SET subscription_status = 'free', payment_proof_path = NULL, package_paid_for = NULL, updated_at = NOW() WHERE id = ? LIMIT 1");
+            $stmt->execute([$shopId]);
+
+            $_SESSION['flash_admin'] = "Pembayaran Toko ID {$shopId} ditolak. Status dikembalikan ke 'free'.";
+        } catch (Throwable $e) {
+            $_SESSION['flash_admin'] = "Gagal menolak pembayaran: " . $e->getMessage();
+        }
+
+        header("Location: {$BASE}/admin/index.php");
+        exit;
+    }
 }
 
 // ===============================================================
@@ -100,25 +132,18 @@ unset($_SESSION['flash_admin']);
 // STATISTIK
 // ===============================================================
 $totalProducts = (int)($pdo->query("SELECT COUNT(*) FROM products WHERE is_active = 1")->fetchColumn() ?? 0);
-$totalShops    = (int)($pdo->query("SELECT COUNT(*) FROM shops")->fetchColumn() ?? 0);
-$pendingShops  = (int)($pdo->query("SELECT COUNT(*) FROM shops WHERE is_active = 0")->fetchColumn() ?? 0);
+$totalShops 	= (int)($pdo->query("SELECT COUNT(*) FROM shops")->fetchColumn() ?? 0);
+$pendingShops 	= (int)($pdo->query("SELECT COUNT(*) FROM shops WHERE is_active = 0")->fetchColumn() ?? 0);
 
 // ===============================================================
-// TOKO AKTIF
+// TOKO AKTIF (is_active = 1) - Query tetap
 // ===============================================================
 $activeShops = [];
 try {
     $stmt = $pdo->prepare("
         SELECT 
-          s.id,
-          s.name,
-          s.address,
-          s.is_active,
-          s.created_at,
-          u.full_name,
-          u.email,
-          COUNT(p.id) AS total_products,
-          SUM(CASE WHEN p.is_active = 1 THEN 1 ELSE 0 END) AS active_products
+          s.id, s.name, s.address, s.is_active, s.created_at, u.full_name, u.email,
+          COUNT(p.id) AS total_products, SUM(CASE WHEN p.is_active = 1 THEN 1 ELSE 0 END) AS active_products
         FROM shops s
         JOIN users u ON u.id = s.user_id
         LEFT JOIN products p ON p.shop_id = s.id
@@ -134,21 +159,13 @@ try {
 }
 
 // ===============================================================
-// PERMINTAAN BUKA TOKO (is_active = 0)
+// PERMINTAAN BUKA TOKO (is_active = 0) - Query tetap
 // ===============================================================
 $requests = [];
 try {
     $stmt = $pdo->prepare("
         SELECT 
-          s.id,
-          s.user_id,
-          s.name,
-          s.address,
-          s.latitude,
-          s.longitude,
-          s.created_at,
-          u.email,
-          u.full_name
+          s.id, s.user_id, s.name, s.address, s.latitude, s.longitude, s.created_at, u.email, u.full_name
         FROM shops s
         JOIN users u ON u.id = s.user_id
         WHERE s.is_active = 0
@@ -162,7 +179,35 @@ try {
 }
 
 // ===============================================================
-// CATATAN / TRANSAKSI TERBARU
+// VERIFIKASI PEMBAYARAN LANGGANAN (subscription_status = 'pending_payment')
+// ===============================================================
+$pendingPayments = [];
+try {
+    $stmt = $pdo->prepare("
+        SELECT 
+          s.id,
+          s.name,
+          s.subscription_status,
+          s.payment_proof_path,     /* Path bukti */
+          s.package_paid_for,       /* Nama paket */
+          s.updated_at,
+          u.full_name,
+          u.email
+        FROM shops s
+        JOIN users u ON u.id = s.user_id
+        WHERE s.subscription_status = 'pending_payment'
+        ORDER BY s.updated_at ASC
+        LIMIT 50
+    ");
+    $stmt->execute();
+    $pendingPayments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Throwable $e) {
+    $pendingPayments = [];
+}
+
+
+// ===============================================================
+// CATATAN / TRANSAKSI TERBARU - Query tetap
 // ===============================================================
 $notes = [];
 try {
@@ -198,7 +243,6 @@ require_once __DIR__ . '/../../includes/header.php';
       </div>
     <?php endif; ?>
 
-    <!-- STATISTIK -->
     <div class="admin-stats">
       <div class="admin-stat-card">
         <div class="stat-number"><?= (int)$totalProducts ?></div>
@@ -214,7 +258,69 @@ require_once __DIR__ . '/../../includes/header.php';
       </div>
     </div>
 
-    <!-- DAFTAR TOKO AKTIF -->
+    <section class="admin-section">
+        <h2 class="section-title">Verifikasi Pembayaran Langganan</h2>
+        <p class="section-subtitle">
+            Periksa bukti transfer dan setujui untuk mengaktifkan paket langganan seller.
+        </p>
+        <?php if (empty($pendingPayments)): ?>
+            <div class="section-empty">Tidak ada pembayaran langganan yang menunggu verifikasi.</div>
+        <?php else: ?>
+            <div class="payment-request-list">
+            <?php foreach ($pendingPayments as $pay): ?>
+                <div class="shop-request-card payment-card">
+                    <div class="shop-request-main">
+                        <div class="shop-name payment-info-title">
+                            Pembayaran Langganan: 
+                            <span style="color: #10b981; font-weight: 700;"><?= e($pay['package_paid_for'] ?? 'TIDAK DIKETAHUI') ?></span>
+                        </div>
+                        
+                        <div class="shop-owner">
+                            Toko: **<?= e($pay['name']) ?>** (ID: <?= (int)$pay['id'] ?>)
+                        </div>
+                        <div class="shop-owner">
+                            Pemilik: <?= e($pay['full_name'] ?? '-') ?> · Email: <?= e($pay['email'] ?? '-') ?>
+                        </div>
+                        <div class="shop-coord">
+                            Diunggah pada: <?= e($pay['updated_at']) ?>
+                        </div>
+                        
+                        <?php if (!empty($pay['payment_proof_path'])): ?>
+                            <div style="margin-top: 10px;">
+                                <a href="<?= e($pay['payment_proof_path']) ?>" target="_blank" class="btn btn-view-proof">
+                                    Lihat Bukti Pembayaran (Baru)
+                                </a>
+                            </div>
+                        <?php else: ?>
+                             <div style="margin-top: 10px; color: red;">
+                                 [ERROR: Bukti pembayaran tidak tercatat di DB]
+                             </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="shop-request-actions">
+                        <form method="post" class="inline-form">
+                            <input type="hidden" name="shop_id" value="<?= (int)$pay['id'] ?>">
+                            <input type="hidden" name="action" value="approve_payment">
+                            <button type="submit" class="btn btn-approve">
+                                ACC Pembayaran
+                            </button>
+                        </form>
+
+                        <form method="post" class="inline-form">
+                            <input type="hidden" name="shop_id" value="<?= (int)$pay['id'] ?>">
+                            <input type="hidden" name="action" value="reject_payment">
+                            <button type="submit" class="btn btn-reject">
+                                Tolak Pembayaran
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </section>
+
     <section class="admin-section">
     <h2 class="section-title">Permintaan Buka Toko</h2>
     <p class="section-subtitle">
@@ -241,14 +347,12 @@ require_once __DIR__ . '/../../includes/header.php';
                 Koordinat: <?= e((string)$req['latitude'] ?? '-') ?>, <?= e((string)$req['longitude'] ?? '-') ?> · Request: <?= e($req['created_at']) ?>
                 </div>
 
-                <!-- DEBUG VISUAL: tampilkan shop_id di layar -->
                 <div style="margin-top:6px;font-size:12px;color:#0f766e;">
                 Debug shop_id: <?= (int)$req['id'] ?>
                 </div>
             </div>
 
             <div class="shop-request-actions">
-                <!-- form approve -->
                 <form method="post" class="inline-form">
                 <input type="hidden" name="shop_id" value="<?= (int)$req['id'] ?>">
                 <input type="hidden" name="action" value="approve_shop">
@@ -257,7 +361,6 @@ require_once __DIR__ . '/../../includes/header.php';
                 </button>
                 </form>
 
-                <!-- form reject -->
                 <form method="post" class="inline-form">
                 <input type="hidden" name="shop_id" value="<?= (int)$req['id'] ?>">
                 <input type="hidden" name="action" value="reject_shop">
@@ -271,8 +374,7 @@ require_once __DIR__ . '/../../includes/header.php';
         </div>
     <?php endif; ?>
     </section>
-
-    <!-- CATATAN / TRANSAKSI TERBARU -->
+    
     <section class="admin-section">
       <h2 class="section-title">Catatan / Transaksi Terbaru</h2>
       <?php if (empty($notes)): ?>
@@ -302,5 +404,3 @@ require_once __DIR__ . '/../../includes/header.php';
 <?php
 require_once __DIR__ . '/../../includes/footer.php';
 ?>
-</body>
-</html>

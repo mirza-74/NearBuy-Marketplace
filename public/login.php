@@ -14,7 +14,7 @@ if (!empty($_SESSION['user'])) {
 
     if ($role === 'admin') {
         // 🛠️ PERBAIKAN 1: Ganti ke halaman dashboard admin yang benar
-        header("Location: $BASE/admin/dashboard.php"); 
+        header("Location: $BASE/admin/index.php"); 
         exit;
     } elseif ($role === 'seller') {
         // 🟢 PERBAIKAN 2: Arahkan Seller ke toko.php (Dashboard Toko)
@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // 2. Redirect setelah login berhasil
                     if ($u['role'] === 'admin') {
                         // 🛠️ PERBAIKAN 3: Ganti ke halaman dashboard admin yang benar
-                        header("Location: $BASE/admin/dashboard.php"); 
+                        header("Location: $BASE/admin/index.php"); 
                     } elseif ($u['role'] === 'seller') {
                         // 🟢 PERBAIKAN 4: Arahkan Seller ke toko.php (Dashboard Toko)
                         header("Location: $BASE/index.php"); 
