@@ -93,6 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'approve_payment') {
         try {
             // Ubah status langganan menjadi 'active', hapus path bukti (opsional)
+            // Anda mungkin ingin menambahkan logika untuk set package_started_at & package_expires_at di sini
             $stmt = $pdo->prepare("UPDATE shops SET subscription_status = 'active', updated_at = NOW() WHERE id = ? LIMIT 1");
             $stmt->execute([$shopId]);
 
@@ -108,8 +109,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // ====== TOLAK PEMBAYARAN LANGGANAN ======
     if ($action === 'reject_payment') {
         try {
-            // Ubah status langganan kembali menjadi 'free' (dan hapus path bukti opsional)
-            $stmt = $pdo->prepare("UPDATE shops SET subscription_status = 'free', payment_proof_path = NULL, package_paid_for = NULL, updated_at = NOW() WHERE id = ? LIMIT 1");
+            // Ubah status langganan kembali menjadi 'free', dan pastikan kolom bukti & paket di-reset
+            $stmt = $pdo->prepare("
+                UPDATE shops SET 
+                    subscription_status = 'free', 
+                    last_payment_proof = NULL, /* MENGGUNAKAN NAMA KOLOM ANDA */
+                    package_code = NULL,       /* MENGGUNAKAN NAMA KOLOM ANDA */
+                    updated_at = NOW() 
+                WHERE id = ? LIMIT 1
+            ");
             $stmt->execute([$shopId]);
 
             $_SESSION['flash_admin'] = "Pembayaran Toko ID {$shopId} ditolak. Status dikembalikan ke 'free'.";
@@ -132,8 +140,8 @@ unset($_SESSION['flash_admin']);
 // STATISTIK
 // ===============================================================
 $totalProducts = (int)($pdo->query("SELECT COUNT(*) FROM products WHERE is_active = 1")->fetchColumn() ?? 0);
-$totalShops 	= (int)($pdo->query("SELECT COUNT(*) FROM shops")->fetchColumn() ?? 0);
-$pendingShops 	= (int)($pdo->query("SELECT COUNT(*) FROM shops WHERE is_active = 0")->fetchColumn() ?? 0);
+$totalShops    = (int)($pdo->query("SELECT COUNT(*) FROM shops")->fetchColumn() ?? 0);
+$pendingShops  = (int)($pdo->query("SELECT COUNT(*) FROM shops WHERE is_active = 0")->fetchColumn() ?? 0);
 
 // ===============================================================
 // TOKO AKTIF (is_active = 1) - Query tetap
@@ -180,6 +188,7 @@ try {
 
 // ===============================================================
 // VERIFIKASI PEMBAYARAN LANGGANAN (subscription_status = 'pending_payment')
+// ** PERBAIKAN DI SINI **
 // ===============================================================
 $pendingPayments = [];
 try {
@@ -188,8 +197,8 @@ try {
           s.id,
           s.name,
           s.subscription_status,
-          s.payment_proof_path,     /* Path bukti */
-          s.package_paid_for,       /* Nama paket */
+          s.last_payment_proof,     /* DIGANTI MENGGUNAKAN last_payment_proof */
+          s.package_code,           /* DIGANTI MENGGUNAKAN package_code */
           s.updated_at,
           u.full_name,
           u.email
@@ -272,7 +281,7 @@ require_once __DIR__ . '/../../includes/header.php';
                     <div class="shop-request-main">
                         <div class="shop-name payment-info-title">
                             Pembayaran Langganan: 
-                            <span style="color: #10b981; font-weight: 700;"><?= e($pay['package_paid_for'] ?? 'TIDAK DIKETAHUI') ?></span>
+                            <span style="color: #10b981; font-weight: 700;"><?= e($pay['package_code'] ?? 'TIDAK DIKETAHUI') ?></span>
                         </div>
                         
                         <div class="shop-owner">
@@ -285,10 +294,10 @@ require_once __DIR__ . '/../../includes/header.php';
                             Diunggah pada: <?= e($pay['updated_at']) ?>
                         </div>
                         
-                        <?php if (!empty($pay['payment_proof_path'])): ?>
+                        <?php if (!empty($pay['last_payment_proof'])): ?>
                             <div style="margin-top: 10px;">
-                                <a href="<?= e($pay['payment_proof_path']) ?>" target="_blank" class="btn btn-view-proof">
-                                    Lihat Bukti Pembayaran (Baru)
+                                <a href="<?= e($pay['last_payment_proof']) ?>" target="_blank" class="btn btn-view-proof">
+                                    Lihat Bukti Pembayaran
                                 </a>
                             </div>
                         <?php else: ?>
@@ -320,8 +329,7 @@ require_once __DIR__ . '/../../includes/header.php';
             </div>
         <?php endif; ?>
     </section>
-
-    <section class="admin-section">
+<section class="admin-section">
     <h2 class="section-title">Permintaan Buka Toko</h2>
     <p class="section-subtitle">
         Setelah disetujui, toko akan masuk ke daftar pemilik toko aktif. Seller kemudian akan diminta memilih paket di sisi mereka.
