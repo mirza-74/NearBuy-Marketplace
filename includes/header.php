@@ -182,8 +182,7 @@ if ($user && in_array($role, ['pengguna', 'seller'], true)) {
       <?php elseif ($role === 'admin'): ?>
 
         <a href="<?= e($BASE_ADMIN) ?>/index.php">📊 Admin Dashboard</a>
-        <a href="<?= e($BASE_ADMIN) ?>/pembeli.php">👥 Kelola Pengguna</a>
-        <a href="<?= e($BASE_ADMIN) ?>/reporting_transaksi.php">📈 Laporan</a>
+        <a href="<?= e($BASE_ADMIN) ?>/pengguna.php">👥 Kelola Pengguna</a>
         <a href="<?= e($BASE) ?>/logout.php" class="logout">Logout</a>
 
       <?php endif; ?>
