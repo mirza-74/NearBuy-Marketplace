@@ -1,19 +1,17 @@
 <?php
 // ===============================================================
-// NearBuy – Halaman Unggah Bukti Pembayaran
-// File: /seller/upload_payment.php
+// NearBuy – Halaman Unggah Bukti Pembayaran (FINAL FIXED VERSION)
 // ===============================================================
 declare(strict_types=1);
 
-// Includes Wajib
 require_once __DIR__ . '/../../includes/session.php';
 require_once __DIR__ . '/../../includes/db.php';
 
-// BASE: otomatis, buang "/seller" di ujung
+// BASE otomatis
 $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
 $BASE = preg_replace('~/seller$~', '', rtrim($scriptDir, '/'));
 
-// helper escape
+// escape
 if (!function_exists('e')) {
     function e(string $s): string {
         return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
@@ -21,183 +19,151 @@ if (!function_exists('e')) {
 }
 
 // ===============================================================
-// 1. VALIDASI LOGIN & AMBIL DATA TOKO
+// 1. VALIDASI LOGIN
 // ===============================================================
 $user = $_SESSION['user'] ?? null;
 if (!$user || empty($user['id'])) {
-    header('Location: ' . $BASE . '/login.php');
+    header("Location: $BASE/login.php");
     exit;
 }
+
 $userId = (int)$user['id'];
-$shop = null;
-try {
-    $stmt = $pdo->prepare("SELECT id FROM shops WHERE user_id = ? LIMIT 1");
-    $stmt->execute([$userId]);
-    $shop = $stmt->fetch(PDO::FETCH_ASSOC);
-} catch (Throwable $e) {}
+
+// AMBIL DATA TOKO
+$stmt = $pdo->prepare("SELECT id FROM shops WHERE user_id = ? LIMIT 1");
+$stmt->execute([$userId]);
+$shop = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$shop) {
+    header("Location: $BASE/seller/toko.php");
+    exit;
+}
 
 // ===============================================================
-// 2. VALIDASI DATA PAKET PILIHAN (Dipastikan ada di sesi)
+// 2. VALIDASI DATA PAKET DI SESSION
 // ===============================================================
 $package = $_SESSION['subscription_plan'] ?? null;
 $shopIdToSubscribe = $_SESSION['subscription_shop_id'] ?? null;
 
-if (!$package || !$shop || $shop['id'] !== $shopIdToSubscribe) {
-    // Jika tidak ada data paket di sesi, redirect kembali ke halaman pilih paket
-    header('Location: ' . $BASE . '/seller/pilih_paket.php');
+if (!$package || (int)$shop['id'] !== (int)$shopIdToSubscribe) {
+    header("Location: $BASE/seller/paket.php");
     exit;
 }
 
 // ===============================================================
-// 3. LOGIKA UNGGAH BUKTI BAYAR (Final)
+// 3. PROSES UPLOAD
 // ===============================================================
 $successMessage = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_FILES['bukti_bayar'])) {
-    
+
     $file = $_FILES['bukti_bayar'];
-    $fileExt = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-
-    // 1. Validasi File
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
     $allowedExt = ['jpg', 'jpeg', 'png'];
-    $maxFileSize = 2 * 1024 * 1024; // 2 MB
 
-    if (!in_array($fileExt, $allowedExt)) {
-        $successMessage = 'Gagal: Hanya format JPG atau PNG yang diperbolehkan.';
-    } elseif ($file['size'] > $maxFileSize) {
-        $successMessage = 'Gagal: Ukuran file melebihi batas 2MB.';
+    if (!in_array($ext, $allowedExt, true)) {
+        $successMessage = "Format file harus JPG/PNG.";
+    } elseif ($file['size'] > 2 * 1024 * 1024) {
+        $successMessage = "Ukuran file maksimal 2MB.";
     } elseif ($file['error'] !== UPLOAD_ERR_OK) {
-        $successMessage = 'Gagal: Terjadi error saat mengunggah file.';
+        $successMessage = "Terjadi error saat upload file.";
     } else {
-        // --- Proses Upload File dan Update DB ---
-        
-        // 2. Definisikan folder tujuan upload
-        // Lokasi folder: SCRIPT_ROOT/uploads/payment_proofs/
-        $uploadDir = __DIR__ . '/../../uploads/payment_proofs/'; 
-        
-        if (!is_dir($uploadDir)) {
-            // Buat folder jika belum ada (pastikan folder /public bisa ditulis)
-            mkdir($uploadDir, 0777, true); 
-        }
-        
-        // 3. Buat nama file unik: shopID_timestamp.ext
-        $fileName = $shop['id'] . '_' . time() . '.' . $fileExt;
-        $filePathServer = $uploadDir . $fileName; // Path absolut di server
-        
-        // Path Relatif untuk disimpan di DB (Path ini yang diakses Admin)
-        $relativeFilePath = $BASE . '/uploads/payment_proofs/' . $fileName; 
 
-        // 4. Pindahkan file
+        // folder
+        $uploadDir = __DIR__ . '/../../uploads/payment_proofs/';
+        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+
+        $fileName = $shop['id'] . '_' . time() . ".$ext";
+        $filePathServer = $uploadDir . $fileName;
+        $relativeFilePath = $BASE . "/uploads/payment_proofs/" . $fileName;
+
         if (move_uploaded_file($file['tmp_name'], $filePathServer)) {
+
             try {
-                // 5. Update Database: Menyimpan path bukti dan nama paket
+                // ===============================================================
+                // UPDATE DATABASE SESUAI STRUKTUR KAMU (package_status)
+                // ===============================================================
                 $stmt = $pdo->prepare("
                     UPDATE shops SET 
-                        subscription_status = 'pending_payment',
-                        last_payment_proof = ?,       /* MENGGUNAKAN NAMA KOLOM DARI DB ANDA */
-                        package_code = ?,             /* MENGGUNAKAN NAMA KOLOM DARI DB ANDA */
-                        updated_at = NOW()
-                    WHERE id = ?
+                        package_status      = 'waiting_payment',
+                        last_payment_proof  = :proof,
+                        package_code        = :pkg,
+                        product_limit       = :limit,
+                        updated_at          = NOW()
+                    WHERE id = :id
                 ");
-                
+
                 $stmt->execute([
-                    $relativeFilePath,      
-                    $package['name'],       // Menyimpan nama paket ke kolom package_code
-                    $shop['id']
+                    ':proof' => $relativeFilePath,
+                    ':pkg'   => $package['name'],
+                    ':limit' => (int)$package['limit'],
+                    ':id'    => $shop['id']
                 ]);
 
-                // Berhasil: hapus session dan tampilkan pesan sukses
-                unset($_SESSION['subscription_plan']);
-                unset($_SESSION['subscription_shop_id']);
-                $successMessage = 'Bukti pembayaran berhasil diunggah. Kami akan memprosesnya dalam 1x24 jam. Langganan Anda akan segera diaktifkan. Anda akan diarahkan kembali ke dashboard toko.';
-                header("Refresh: 5; url=" . $BASE . "/seller/toko.php");
+                // hapus session
+                unset($_SESSION['subscription_plan'], $_SESSION['subscription_shop_id']);
+
+                $successMessage =
+                    "Bukti pembayaran berhasil diunggah! Admin akan memverifikasi.<br>
+                     Kamu akan diarahkan ke halaman toko dalam 5 detik.";
+
+                header("Refresh: 5; url=$BASE/seller/toko.php");
 
             } catch (Throwable $e) {
-                 // Error DB
-                 $successMessage = 'Gagal menyimpan data pembayaran ke database. ' . $e->getMessage();
-                 // Hapus file yang sudah terlanjur diupload jika error DB
-                 if (file_exists($filePathServer)) { unlink($filePathServer); }
+
+                if (file_exists($filePathServer)) unlink($filePathServer);
+
+                $successMessage = "Gagal menyimpan data ke database.<br>Error: " . $e->getMessage();
             }
+
         } else {
-            // Error move file (izin folder)
-            $successMessage = 'Gagal memindahkan file ke server. Pastikan folder (/uploads/payment_proofs/) memiliki izin tulis (chmod 777).';
+            $successMessage = "Gagal memindahkan file ke server.";
         }
     }
 }
 
 // ===============================================================
-// HEADER DAN HTML
-// ===============================================================
-
 require_once __DIR__ . '/../../includes/header.php';
 ?>
 
-<link rel="stylesheet" href="style_seller.css"> 
+<link rel="stylesheet" href="style_seller.css">
 
 <div class="nb-shell">
-    <section class="nb-card nb-main-card" style="max-width: 600px; margin: auto;"> 
-        <h1 class="nb-title">Pembayaran Langganan</h1>
-        
-        <?php if ($successMessage): ?>
-            <p class="nb-success-msg">
-                <?= $successMessage ?>
-            </p>
-        <?php else: ?>
+    <section class="nb-card nb-main-card" style="max-width:600px;margin:auto;">
 
-            <?php if ($package): // Pengecekan untuk menghindari Fatal Error jika sesi sudah terhapus ?>
-                <p class="nb-sub">
-                    Paket Pilihan: 
-                    <b><?= e($package['name'] ?? 'N/A') ?></b> 
-                    (Rp<?= number_format((float)($package['price'] ?? 0), 0, ',', '.') ?> / bulan)
-                </p>
-            <?php else: ?>
-                <p class="nb-sub" style="color: gray;">
-                    Informasi paket tidak ditemukan. Harap kembali ke halaman pilih paket.
-                </p>
-            <?php endif; ?>
+    <h1 class="nb-title">Pembayaran Langganan</h1>
 
-            <p class="nb-sub">
-                Silakan transfer ke rekening berikut dan unggah bukti pembayarannya:
-            </p>
+    <?php if ($successMessage): ?>
 
-            <div class="nb-bank-box">
-                <p class="bank-label">Bank Tujuan:</p> 
-                <p class="bank-detail">
-                    Bank ABC: 123456789
-                </p>
-                <p class="bank-footer">(a.n. NearBuy)</p>
-            </div>
-            
-            <form method="post" enctype="multipart/form-data">
-                <div class="nb-field file-input-wrapper">
-                    <label class="nb-label">Unggah Bukti Pembayaran (JPG/PNG)</label>
-                    
-                    <input type="file" id="bukti_bayar" name="bukti_bayar" required accept="image/jpeg, image/png">
-                    
-                    <label for="bukti_bayar" class="file-input-custom">
-                        Pilih File
-                    </label>
-                    
-                    <span id="file-name">Tidak ada file dipilih.</span>
-                </div>
+        <p class="nb-success-msg"><?= $successMessage ?></p>
 
-                <button type="submit" class="nb-btn nb-btn-primary nb-action-full">
-                    Konfirmasi Pembayaran
-                </button>
-            </form>
-        <?php endif; ?>
+    <?php else: ?>
+
+        <p class="nb-sub">
+            Paket dipilih: <b><?= e($package['name']) ?></b> — 
+            Rp<?= number_format($package['price'], 0, ',', '.') ?>/bulan
+        </p>
+
+        <div class="nb-bank-box">
+            <p class="bank-label">Bank Tujuan:</p>
+            <p class="bank-detail">Bank ABC: 123456789</p>
+            <p class="bank-footer">(a.n NearBuy)</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+
+            <label class="nb-label">Unggah Bukti Pembayaran</label>
+            <input type="file" name="bukti_bayar" required accept="image/jpeg,image/png">
+
+            <button type="submit" class="nb-btn nb-btn-primary nb-action-full">
+                Konfirmasi Pembayaran
+            </button>
+
+        </form>
+
+    <?php endif; ?>
 
     </section>
 </div>
-
-<script>
-    document.getElementById('bukti_bayar').addEventListener('change', function() {
-        const fileNameSpan = document.getElementById('file-name');
-        if (this.files.length > 0) {
-            fileNameSpan.textContent = 'File terpilih: ' + this.files[0].name;
-        } else {
-            fileNameSpan.textContent = 'Tidak ada file dipilih.';
-        }
-    });
-</script>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

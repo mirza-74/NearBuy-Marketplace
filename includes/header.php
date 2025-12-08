@@ -8,19 +8,30 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// ---------------------------------------------------------------
-// BASE: SELALU hitung dari lokasi script saat ini
-// ---------------------------------------------------------------
-$scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
-$BASE      = rtrim($scriptDir, '/');
+/*
+ |---------------------------------------------------------------
+ | BASE URL
+ |---------------------------------------------------------------
+ | - Kalau file pemanggil sudah set $BASE, kita pakai itu.
+ | - Kalau belum, kita hitung dari SCRIPT_NAME dan cari segmen "/public".
+ | - Fallback terakhir: '/NearBuy-Marketplace/public'
+ */
+if (empty($BASE)) {
+    $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')); // contoh: /NearBuy-Marketplace/public/seller
 
-// kalau dipanggil dari /public/seller/... atau /public/admin/...
-// buang segmen terakhir supaya BASE selalu /NearBuy-marketplace/public
-$BASE = preg_replace('~/(seller|admin)$~i', '', $BASE);
-
-if ($BASE === '' || $BASE === '/') {
-    $BASE = '/NearBuy-marketplace/public';
+    $posPublic = stripos($scriptDir, '/public');
+    if ($posPublic !== false) {
+        // ambil sampai "/public"
+        $BASE = substr($scriptDir, 0, $posPublic + 7); // 7 = strlen("/public")
+    } else {
+        // fallback kalau struktur folder berubah
+        $BASE = '/NearBuy-Marketplace/public';
+    }
 }
+
+// untuk kenyamanan halaman2 seller / admin
+$BASE_SELLER = $BASE . '/seller';
+$BASE_ADMIN  = $BASE . '/admin';
 
 // helper escape
 if (!function_exists('e')) {
@@ -65,7 +76,6 @@ $shopMenuLabel = '🏪 Buka Toko';
 
 // untuk user login non-admin, cek apakah sudah punya toko
 if ($user && in_array($role, ['pengguna', 'seller'], true)) {
-    // aman: require_once, walau sebagian halaman sudah include db.php
     require_once __DIR__ . '/db.php';
 
     if (isset($pdo) && $pdo instanceof PDO) {
@@ -77,13 +87,10 @@ if ($user && in_array($role, ['pengguna', 'seller'], true)) {
             if ($rowShop) {
                 $status = (int)$rowShop['is_active'];
                 if ($status === 1) {
-                    // sudah disetujui admin
                     $shopMenuLabel = '🏪 Toko Saya';
                 } elseif ($status === 0) {
-                    // sudah daftar, tapi masih pending admin
                     $shopMenuLabel = '🏪 Toko (menunggu admin)';
                 } elseif ($status === 2) {
-                    // ditolak admin
                     $shopMenuLabel = '🏪 Toko (ditolak)';
                 }
             }
@@ -164,18 +171,19 @@ if ($user && in_array($role, ['pengguna', 'seller'], true)) {
         <a href="<?= e($BASE) ?>/set_lokasi.php">📍 Set Lokasi</a>
 
         <!-- label toko dinamis, tapi tujuannya selalu ke /seller/toko.php -->
-        <a href="<?= e($BASE) ?>/seller/toko.php">
+        <a href="<?= e($BASE_SELLER) ?>/toko.php">
           <?= e($shopMenuLabel) ?>
         </a>
+
         <a href="<?= e($BASE) ?>/keranjang.php">🛒 Keranjang</a>
         <a href="<?= e($BASE) ?>/profil.php">👤 Profil</a>
         <a href="<?= e($BASE) ?>/logout.php" class="logout">Logout</a>
 
       <?php elseif ($role === 'admin'): ?>
 
-        <a href="<?= e($BASE) ?>/admin/index.php">📊 Admin Dashboard</a>
-        <a href="<?= e($BASE) ?>/admin/pembeli.php">👥 Kelola Pengguna</a>
-        <a href="<?= e($BASE) ?>/admin/reporting_transaksi.php">📈 Laporan</a>
+        <a href="<?= e($BASE_ADMIN) ?>/index.php">📊 Admin Dashboard</a>
+        <a href="<?= e($BASE_ADMIN) ?>/pembeli.php">👥 Kelola Pengguna</a>
+        <a href="<?= e($BASE_ADMIN) ?>/reporting_transaksi.php">📈 Laporan</a>
         <a href="<?= e($BASE) ?>/logout.php" class="logout">Logout</a>
 
       <?php endif; ?>
