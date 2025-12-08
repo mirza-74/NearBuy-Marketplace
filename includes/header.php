@@ -1,6 +1,6 @@
 <?php
 // ===============================================================
-// NearBuy – Header (auto BASE based nav + auto CSS toko)
+// NearBuy – Header (auto BASE + auto CSS toko + label toko dinamis)
 // ===============================================================
 declare(strict_types=1);
 
@@ -8,13 +8,18 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// BASE
-if (empty($BASE)) {
-    $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
-    $BASE = rtrim($scriptDir, '/');
-    if ($BASE === '' || $BASE === '/') {
-        $BASE = '/NearBuy-marketplace/public';
-    }
+// ---------------------------------------------------------------
+// BASE: SELALU hitung dari lokasi script saat ini
+// ---------------------------------------------------------------
+$scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+$BASE      = rtrim($scriptDir, '/');
+
+// kalau dipanggil dari /public/seller/... atau /public/admin/...
+// buang segmen terakhir supaya BASE selalu /NearBuy-marketplace/public
+$BASE = preg_replace('~/(seller|admin)$~i', '', $BASE);
+
+if ($BASE === '' || $BASE === '/') {
+    $BASE = '/NearBuy-marketplace/public';
 }
 
 // helper escape
@@ -34,7 +39,7 @@ if ($user && is_array($user)) {
     }
 }
 
-// paksa guest jika perlu
+// paksa guest jika perlu (misal di landing khusus)
 if (!empty($FORCE_GUEST_HEADER)) {
     $role = 'guest';
 }
@@ -50,7 +55,42 @@ if ($isTokoPage) {
     if (!isset($EXTRA_CSS) || !is_array($EXTRA_CSS)) {
         $EXTRA_CSS = [];
     }
-    $EXTRA_CSS[] = "seller/style-toko.css";
+    $EXTRA_CSS[] = 'seller/style-toko.css';
+}
+
+// =======================================
+// 🔍 Label menu Toko (Buka Toko / Toko Saya)
+// =======================================
+$shopMenuLabel = '🏪 Buka Toko';
+
+// untuk user login non-admin, cek apakah sudah punya toko
+if ($user && in_array($role, ['pengguna', 'seller'], true)) {
+    // aman: require_once, walau sebagian halaman sudah include db.php
+    require_once __DIR__ . '/db.php';
+
+    if (isset($pdo) && $pdo instanceof PDO) {
+        try {
+            $stmtShop = $pdo->prepare("SELECT is_active FROM shops WHERE user_id = ? LIMIT 1");
+            $stmtShop->execute([(int)$user['id']]);
+            $rowShop = $stmtShop->fetch(PDO::FETCH_ASSOC);
+
+            if ($rowShop) {
+                $status = (int)$rowShop['is_active'];
+                if ($status === 1) {
+                    // sudah disetujui admin
+                    $shopMenuLabel = '🏪 Toko Saya';
+                } elseif ($status === 0) {
+                    // sudah daftar, tapi masih pending admin
+                    $shopMenuLabel = '🏪 Toko (menunggu admin)';
+                } elseif ($status === 2) {
+                    // ditolak admin
+                    $shopMenuLabel = '🏪 Toko (ditolak)';
+                }
+            }
+        } catch (Throwable $e) {
+            // kalau gagal query, biarkan label default saja
+        }
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -118,20 +158,15 @@ if ($isTokoPage) {
           <i class="fa-solid fa-right-to-bracket"></i> <span>Login</span>
         </a>
 
-      <?php elseif ($role === 'pengguna'): ?>
+      <?php elseif ($role === 'pengguna' || $role === 'seller'): ?>
 
         <a href="<?= e($BASE) ?>/index.php">Home</a>
         <a href="<?= e($BASE) ?>/set_lokasi.php">📍 Set Lokasi</a>
-        <a href="<?= e($BASE) ?>/seller/toko.php">🏪 Buka Toko</a>
-        <a href="<?= e($BASE) ?>/keranjang.php">🛒 Keranjang</a>
-        <a href="<?= e($BASE) ?>/profil.php">👤 Profil</a>
-        <a href="<?= e($BASE) ?>/logout.php" class="logout">Logout</a>
 
-      <?php elseif ($role === 'seller'): ?>
-
-        <a href="<?= e($BASE) ?>/index.php">Home</a>
-        <a href="<?= e($BASE) ?>/set_lokasi.php">📍 Set Lokasi</a>
-        <a href="<?= e($BASE) ?>/seller/toko.php">🏪 Toko Saya</a>
+        <!-- label toko dinamis, tapi tujuannya selalu ke /seller/toko.php -->
+        <a href="<?= e($BASE) ?>/seller/toko.php">
+          <?= e($shopMenuLabel) ?>
+        </a>
         <a href="<?= e($BASE) ?>/keranjang.php">🛒 Keranjang</a>
         <a href="<?= e($BASE) ?>/profil.php">👤 Profil</a>
         <a href="<?= e($BASE) ?>/logout.php" class="logout">Logout</a>
