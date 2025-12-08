@@ -22,7 +22,8 @@ if (!$user || ($user['role'] ?? '') !== 'seller') {
 $sellerId = (int)($user['id'] ?? 0);
 
 // CSS khusus seller dashboard
-$EXTRA_CSS = ['seller/style-admin-dashboard.css'];
+$EXTRA_CSS = $EXTRA_CSS ?? [];
+$EXTRA_CSS[] = 'seller/style-admin-dashboard.css';
 
 // Helper dasar
 if (!function_exists('e')) {
@@ -34,12 +35,12 @@ if (!function_exists('e')) {
 // ===============================================================
 // Konfigurasi Upload Gambar Produk
 // ===============================================================
-$UPLOAD_DIR_FS 	= dirname(__DIR__) . '/uploads/products'; 	// /public/uploads/products
-$UPLOAD_DIR_URL = $BASE . '/uploads/products'; 				// /NearBuy-marketplace/public/uploads/products
-$MAX_SIZE 		= 5 * 1024 * 1024; 							// 5MB
-$ALLOWED_MIME 	= [
+$UPLOAD_DIR_FS  = dirname(__DIR__) . '/uploads/products';   // /public/uploads/products
+$UPLOAD_DIR_URL = $BASE . '/uploads/products';              // /NearBuy-marketplace/public/uploads/products
+$MAX_SIZE       = 5 * 1024 * 1024;                          // 5MB
+$ALLOWED_MIME   = [
     'image/jpeg' => 'jpg',
-    'image/png' 	=> 'png',
+    'image/png'  => 'png',
     'image/webp' => 'webp',
 ];
 
@@ -47,7 +48,7 @@ if (!is_dir($UPLOAD_DIR_FS)) {
     @mkdir($UPLOAD_DIR_FS, 0775, true);
 }
 
-// Helper upload
+// Helper upload & misc
 function limit_words(string $s, int $max = 250): string {
     $s = trim($s);
     if ($s === '') return '';
@@ -67,23 +68,23 @@ function move_uploaded_image(array $f, string $UPLOAD_DIR_FS, array $ALLOWED_MIM
     }
 
     if ($f['error'] !== UPLOAD_ERR_OK) {
-        throw new RuntimeException('Gagal upload gambar. Kode error: '.$f['error']);
+        throw new RuntimeException('Gagal upload gambar. Kode error: ' . $f['error']);
     }
 
     if ($f['size'] > $MAX_SIZE) {
         throw new RuntimeException('Ukuran gambar melebihi 5MB.');
     }
 
-    $fi 	= new finfo(FILEINFO_MIME_TYPE);
+    $fi   = new finfo(FILEINFO_MIME_TYPE);
     $mime = $fi->file($f['tmp_name']) ?: '';
 
     if (!isset($ALLOWED_MIME[$mime])) {
         throw new RuntimeException('Tipe gambar tidak didukung. Gunakan JPG, PNG, atau WebP.');
     }
 
-    $ext 	= $ALLOWED_MIME[$mime];
+    $ext   = $ALLOWED_MIME[$mime];
     $stamp = date('Ymd_His');
-    $rand 	= bin2hex(random_bytes(3));
+    $rand  = bin2hex(random_bytes(3));
     $fname = "product_{$stamp}_{$rand}.{$ext}";
 
     $dest = rtrim($UPLOAD_DIR_FS, '/\\') . '/' . $fname;
@@ -100,7 +101,7 @@ function delete_local_image_if_any(?string $path): void {
     if (!$path) return;
     if (is_https_url($path)) return;
 
-    $abs = dirname(__DIR__) . '/uploads/' . ltrim($path, '/');
+    $abs     = dirname(__DIR__) . '/uploads/' . ltrim($path, '/');
     $absNorm = str_replace('\\', '/', $abs);
 
     if (is_file($abs) && str_contains($absNorm, '/uploads/products/')) {
@@ -117,7 +118,7 @@ function slugify(string $s): string {
 
 function make_unique_slug(PDO $pdo, string $base, ?int $excludeId = null): string {
     $slug = $base;
-    $i 	= 1;
+    $i    = 1;
 
     while (true) {
         if ($excludeId) {
@@ -137,16 +138,45 @@ function make_unique_slug(PDO $pdo, string $base, ?int $excludeId = null): strin
 }
 
 // ===============================================================
-// Ambil daftar toko milik seller
+// Ambil daftar toko milik seller (hanya yang AKTIF + paket aktif)
+// Lokasi (lat,lng) diambil dari set_lokasi.php via tabel shops
 // ===============================================================
-$stmtShop = $pdo->prepare("SELECT id, name, address FROM shops WHERE user_id = ? ORDER BY created_at ASC");
+$stmtShop = $pdo->prepare("
+    SELECT 
+        id,
+        name,
+        address,
+        latitude,
+        longitude,
+        product_limit,
+        package_status,
+        is_active
+    FROM shops
+    WHERE user_id = ?
+    ORDER BY created_at ASC
+");
 $stmtShop->execute([$sellerId]);
-$sellerShops = $stmtShop->fetchAll(PDO::FETCH_ASSOC);
+$shopsRaw = $stmtShop->fetchAll(PDO::FETCH_ASSOC);
+
+// filter hanya toko aktif + paket aktif untuk penambahan produk
+$sellerShops = [];
+$shopById    = [];
+$totalAllowedFromPackage = 0;
+
+foreach ($shopsRaw as $s) {
+    $sid           = (int)$s['id'];
+    $shopById[$sid] = $s;
+
+    if ((int)$s['is_active'] === 1 && ($s['package_status'] ?? 'none') === 'active') {
+        $sellerShops[] = $s;
+        $limit = (int)($s['product_limit'] ?? 0);
+        if ($limit > 0) {
+            $totalAllowedFromPackage += $limit;
+        }
+    }
+}
 
 $hasShop = !empty($sellerShops);
-
-// Jika belum punya toko, nanti di tampilan akan ada pesan
-// dan form tambah produk tidak akan muncul
 
 // ===============================================================
 // Ambil kategori aktif untuk checkbox
@@ -165,54 +195,59 @@ $action = $_POST['action'] ?? '';
 
 if (!empty($action) && function_exists('csrf_verify') && !csrf_verify($_POST['csrf'] ?? '')) {
     $_SESSION['flash'] = 'Sesi berakhir. Coba ulangi.';
-    header('Location: '.$_SERVER['REQUEST_URI']);
+    header('Location: ' . $_SERVER['REQUEST_URI']);
     exit;
 }
 
 try {
     if ($action === 'create') {
         if (!$hasShop) {
-            throw new RuntimeException('Buat toko terlebih dahulu sebelum menambah produk.');
+            throw new RuntimeException('Buat toko terlebih dahulu dan aktifkan paket sebelum menambah produk.');
         }
 
-        // -----------------------------------------------------------------
-        // >>> LOGIKA BATASAN PRODUK DITAMBAHKAN DI SINI <<<
-        // -----------------------------------------------------------------
-        $MAX_PRODUCTS_LIMIT = 20; // Atur batas maksimum produk per seller
+        // BATASAN PRODUK: pakai shops.product_limit dari paket
+        // Jika totalAllowedFromPackage > 0 → berarti ada limit
+        // Kalau 0 → dianggap unlimited
+        if ($totalAllowedFromPackage > 0) {
+            $currentProductCount = $pdo->prepare("
+                SELECT COUNT(p.id)
+                FROM products p
+                JOIN shops s ON s.id = p.shop_id
+                WHERE s.user_id = ?
+            ");
+            $currentProductCount->execute([$sellerId]);
+            $count = (int)$currentProductCount->fetchColumn();
 
-        $currentProductCount = $pdo->prepare("
-            SELECT COUNT(p.id) 
-            FROM products p 
-            JOIN shops s ON s.id = p.shop_id 
-            WHERE s.user_id = ?
-        ");
-        $currentProductCount->execute([$sellerId]);
-        $count = (int)$currentProductCount->fetchColumn();
-
-        if ($count >= $MAX_PRODUCTS_LIMIT) {
-             throw new RuntimeException('Batas produk kamu ('.$MAX_PRODUCTS_LIMIT.') sudah tercapai. Hapus produk lama atau hubungi admin untuk *upgrade* paket.');
+            if ($count >= $totalAllowedFromPackage) {
+                throw new RuntimeException(
+                    'Batas produk dari paket kamu (' . $totalAllowedFromPackage . ' produk) sudah tercapai. ' .
+                    'Hapus produk lama atau hubungi admin untuk upgrade paket.'
+                );
+            }
         }
-        // -----------------------------------------------------------------
-        // >>> AKHIR LOGIKA BATASAN PRODUK <<<
-        // -----------------------------------------------------------------
-        
-        $title 	 = trim($_POST['title'] ?? '');
-        $shopId 	= (int)($_POST['shop_id'] ?? 0);
-        $desc 	 = limit_words((string)($_POST['description'] ?? ''), 250);
-        $price 	= (float)($_POST['price'] ?? 0);
+
+        $title   = trim($_POST['title'] ?? '');
+        $shopId  = (int)($_POST['shop_id'] ?? 0);
+        $desc    = limit_words((string)($_POST['description'] ?? ''), 250);
+        $price   = (float)($_POST['price'] ?? 0);
         $compare = ($_POST['compare_price'] === '' ? null : (float)$_POST['compare_price']);
-        $stock 	= (int)($_POST['stock'] ?? 0);
-        $catIds 	= array_map('intval', $_POST['category_ids'] ?? []);
+        $stock   = (int)($_POST['stock'] ?? 0);
+        $catIds  = array_map('intval', $_POST['category_ids'] ?? []);
 
         if ($title === '' || $shopId <= 0 || $price <= 0) {
             throw new RuntimeException('Nama produk, toko, dan harga wajib diisi.');
         }
 
-        // Pastikan toko ini milik seller yang login
-        $checkShop = $pdo->prepare("SELECT id FROM shops WHERE id = ? AND user_id = ? LIMIT 1");
+        // Pastikan toko ini milik seller & aktif & paket aktif
+        $checkShop = $pdo->prepare("
+            SELECT id 
+            FROM shops 
+            WHERE id = ? AND user_id = ? AND is_active = 1 AND package_status = 'active'
+            LIMIT 1
+        ");
         $checkShop->execute([$shopId, $sellerId]);
         if (!$checkShop->fetchColumn()) {
-            throw new RuntimeException('Toko tidak valid.');
+            throw new RuntimeException('Toko tidak valid atau paket belum aktif.');
         }
 
         // Gambar
@@ -227,22 +262,31 @@ try {
         }
 
         $baseSlug = slugify($title);
-        $slug 	 = make_unique_slug($pdo, $baseSlug, null);
+        $slug     = make_unique_slug($pdo, $baseSlug, null);
 
         $pdo->beginTransaction();
         try {
-            // is_active = 0 untuk status pending, admin yang mengaktifkan
+            // is_active = 0 → pending admin
             $stmt = $pdo->prepare("
                 INSERT INTO products (
-                    shop_id, title, slug, description,
-                    price, compare_price, stock, main_image,
-                    is_active, created_at
+                    shop_id,
+                    seller_id,
+                    title,
+                    slug,
+                    description,
+                    price,
+                    compare_price,
+                    stock,
+                    main_image,
+                    is_active,
+                    created_at
                 )
-                VALUES (?,?,?,?,?,?,?,?,0,NOW())
+                VALUES (?,?,?,?,?,?,?,?,?,0,NOW())
             ");
 
             $stmt->execute([
                 $shopId,
+                $sellerId,
                 $title,
                 $slug,
                 $desc,
@@ -273,18 +317,18 @@ try {
         }
 
         $_SESSION['flash'] = 'Produk berhasil ditambahkan. Menunggu persetujuan admin.';
-        header('Location: '.$_SERVER['REQUEST_URI']);
+        header('Location: ' . $_SERVER['REQUEST_URI']);
         exit;
     }
 
     if ($action === 'update') {
-        $id 	 	= (int)($_POST['id'] ?? 0);
-        $title 	 = trim($_POST['title'] ?? '');
-        $desc 	 = limit_words((string)($_POST['description'] ?? ''), 250);
-        $price 	= (float)($_POST['price'] ?? 0);
+        $id      = (int)($_POST['id'] ?? 0);
+        $title   = trim($_POST['title'] ?? '');
+        $desc    = limit_words((string)($_POST['description'] ?? ''), 250);
+        $price   = (float)($_POST['price'] ?? 0);
         $compare = ($_POST['compare_price'] === '' ? null : (float)$_POST['compare_price']);
-        $stock 	= (int)($_POST['stock'] ?? 0);
-        $catIds 	= array_map('intval', $_POST['category_ids'] ?? []);
+        $stock   = (int)($_POST['stock'] ?? 0);
+        $catIds  = array_map('intval', $_POST['category_ids'] ?? []);
 
         if ($id <= 0 || $title === '' || $price <= 0) {
             throw new RuntimeException('Data produk tidak lengkap.');
@@ -305,12 +349,12 @@ try {
             throw new RuntimeException('Produk tidak ditemukan atau bukan milik Anda.');
         }
 
-        $oldImg 	= (string)($oldRow['main_image'] ?? '');
+        $oldImg  = (string)($oldRow['main_image'] ?? '');
         $oldSlug = (string)($oldRow['slug'] ?? '');
 
         // Slug baru jika judul berubah
         $baseSlug = slugify($title);
-        $slug 	 = ($baseSlug === $oldSlug)
+        $slug     = ($baseSlug === $oldSlug)
             ? $oldSlug
             : make_unique_slug($pdo, $baseSlug, $id);
 
@@ -374,7 +418,7 @@ try {
         }
 
         $_SESSION['flash'] = 'Produk berhasil diperbarui.';
-        header('Location: '.$BASE.'/seller/produk.php');
+        header('Location: ' . $BASE . '/seller/produk.php');
         exit;
     }
 
@@ -404,20 +448,20 @@ try {
         $pdo->prepare("DELETE FROM products WHERE id = ?")->execute([$id]);
 
         $_SESSION['flash'] = 'Produk berhasil dihapus.';
-        header('Location: '.$_SERVER['REQUEST_URI']);
+        header('Location: ' . $_SERVER['REQUEST_URI']);
         exit;
     }
 } catch (Throwable $e) {
     $_SESSION['flash'] = 'Error: ' . $e->getMessage();
-    header('Location: '.$_SERVER['REQUEST_URI']);
+    header('Location: ' . $_SERVER['REQUEST_URI']);
     exit;
 }
 
 // ===============================================================
 // Data untuk tampilan: produk milik seller
 // ===============================================================
-$editId 	 	= isset($_GET['edit']) ? (int)$_GET['edit'] : 0;
-$editItem 	 	= null;
+$editId         = isset($_GET['edit']) ? (int)$_GET['edit'] : 0;
+$editItem       = null;
 $editItemCatIds = [];
 
 // Produk yang bisa diedit hanya produk milik seller
@@ -425,7 +469,7 @@ if ($editId > 0) {
     $sel = $pdo->prepare("
         SELECT p.id, p.shop_id, p.title, p.description, p.price, 
                p.compare_price, p.stock, p.main_image, p.is_active, 
-               p.created_at, s.name AS shop_name
+               p.created_at, s.name AS shop_name, s.latitude, s.longitude
         FROM products p
         JOIN shops s ON s.id = p.shop_id
         WHERE p.id = ? AND s.user_id = ?
@@ -441,29 +485,27 @@ if ($editId > 0) {
     }
 }
 
-// List produk milik seller
+// List produk milik seller (sertakan lokasi toko)
 $stmtItems = $pdo->prepare("
     SELECT 
         p.id, p.title, p.description, p.price, p.compare_price,
         p.stock, p.main_image, p.is_active, p.created_at,
-        s.name AS shop_name
+        s.name AS shop_name, s.latitude, s.longitude
     FROM products p
     JOIN shops s ON s.id = p.shop_id
     WHERE s.user_id = ?
     ORDER BY p.created_at DESC
-    -- LIMIT 200 DIHILANGKAN untuk menampilkan semua produk
-    -- LIMIT 200
 ");
 $stmtItems->execute([$sellerId]);
 $items = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
 
 // Ambil kategori semua produk untuk chips
-$ids 	= array_map(fn($r) => (int)$r['id'], $items);
+$ids    = array_map(fn($r) => (int)$r['id'], $items);
 $catMap = [];
 
 if ($ids) {
     $in = implode(',', array_fill(0, count($ids), '?'));
-    $q 	= $pdo->prepare("
+    $q  = $pdo->prepare("
         SELECT pc.product_id, c.name
         FROM product_categories pc
         JOIN categories c ON c.id = pc.category_id
@@ -520,19 +562,27 @@ h1{font-size:1.6rem;font-weight:700;margin-bottom:12px;}
 
     <?php if (!$hasShop): ?>
         <div class="edit-card">
-            <h3 style="margin-top:0;">Belum ada toko</h3>
+            <h3 style="margin-top:0;">Belum ada toko aktif dengan paket aktif</h3>
             <p class="small-note">
-                Kamu belum memiliki toko di NearBuy.
-                Buat toko terlebih dahulu agar bisa menambah produk dan menghubungkannya dengan lokasi.
+                Kamu belum memiliki toko aktif dengan paket langganan aktif.
+                Pastikan toko sudah disetujui admin dan paket sudah aktif, lalu kamu bisa menambah produk.
+                Lokasi produk akan mengikuti lokasi toko yang diatur di menu <b>Set Lokasi</b>.
             </p>
-            <a class="btn primary" href="<?= e($BASE) ?>/seller/toko.php">Buka Toko Sekarang</a>
+            <a class="btn primary" href="<?= e($BASE) ?>/seller/toko.php">Kelola Toko / Paket</a>
         </div>
     <?php else: ?>
 
         <div class="edit-card">
             <h3 style="margin:0 0 8px">Tambah Produk Baru</h3>
+            <p class="small-note">
+                Lokasi produk akan mengikuti <b>lokasi toko</b> (latitude/longitude) yang sudah kamu atur di
+                menu <b>Set Lokasi</b>. Di halaman pembeli (index.php), produk akan dikurasi berdasarkan jarak
+                dari lokasi pembeli.
+            </p>
             <form method="post" enctype="multipart/form-data">
-                <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
+                <?php if (function_exists('csrf_token')): ?>
+                    <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
+                <?php endif; ?>
                 <input type="hidden" name="action" value="create">
 
                 <div class="form-grid">
@@ -540,18 +590,20 @@ h1{font-size:1.6rem;font-weight:700;margin-bottom:12px;}
                         <option value="">Pilih Toko</option>
                         <?php foreach ($sellerShops as $s): ?>
                             <option value="<?= (int)$s['id'] ?>">
-                                <?= e($s['name']) ?>
+                                <?= e($s['name']) ?> —
+                                <?= e(mb_strimwidth((string)($s['address'] ?? ''), 0, 40, '…', 'UTF-8')) ?>
+                                (Lat: <?= e((string)$s['latitude']) ?>, Lng: <?= e((string)$s['longitude']) ?>)
                             </option>
                         <?php endforeach; ?>
                     </select>
 
-                    <input type="text" 	name="title" 		placeholder="Nama produk *" required>
-                    <input type="number" name="price" 		placeholder="Harga (Rp) *" step="100" min="0" required>
-                    <input type="number" name="compare_price" placeholder="Harga banding (opsional)" step="100" min="0">
-                    <input type="number" name="stock" 		placeholder="Stok *" min="0" required>
+                    <input type="text"  name="title"          placeholder="Nama produk *" required>
+                    <input type="number" name="price"          placeholder="Harga (Rp) *" step="100" min="0" required>
+                    <input type="number" name="compare_price"  placeholder="Harga banding (opsional)" step="100" min="0">
+                    <input type="number" name="stock"          placeholder="Stok *" min="0" required>
 
-                    <input type="file" 	name="image_file" 	accept=".jpg,.jpeg,.png,.webp">
-                    <input type="text" 	name="main_image" 	placeholder="Opsional: path atau URL gambar">
+                    <input type="file"  name="image_file"      accept=".jpg,.jpeg,.png,.webp">
+                    <input type="text"  name="main_image"      placeholder="Opsional: path atau URL gambar">
 
                     <textarea class="full" name="description" placeholder="Deskripsi singkat produk, maksimal sekitar 250 kata."></textarea>
 
@@ -581,7 +633,9 @@ h1{font-size:1.6rem;font-weight:700;margin-bottom:12px;}
                     Edit Produk: <?= e($editItem['title']) ?>
                 </h3>
                 <p class="small-note">
-                    Toko: <?= e($editItem['shop_name'] ?? 'Toko') ?>.
+                    Toko: <?= e($editItem['shop_name'] ?? 'Toko') ?> ·
+                    Lokasi: Lat <?= e((string)($editItem['latitude'] ?? '')) ?>,
+                    Lng <?= e((string)($editItem['longitude'] ?? '')) ?>.
                     Status saat ini:
                     <?php if ((int)$editItem['is_active'] === 1): ?>
                         <span class="badge b-on">Aktif (disetujui admin)</span>
@@ -591,18 +645,20 @@ h1{font-size:1.6rem;font-weight:700;margin-bottom:12px;}
                 </p>
 
                 <form method="post" enctype="multipart/form-data">
-                    <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
+                    <?php if (function_exists('csrf_token')): ?>
+                        <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
+                    <?php endif; ?>
                     <input type="hidden" name="action" value="update">
                     <input type="hidden" name="id" value="<?= (int)$editItem['id'] ?>">
 
                     <div class="form-grid">
-                        <input type="text" 	name="title" value="<?= e($editItem['title']) ?>" required>
+                        <input type="text"  name="title" value="<?= e($editItem['title']) ?>" required>
                         <input type="number" name="price" value="<?= (float)$editItem['price'] ?>" step="100" min="0" required>
                         <input type="number" name="compare_price" value="<?= is_null($editItem['compare_price']) ? '' : (float)$editItem['compare_price'] ?>" step="100" min="0">
                         <input type="number" name="stock" value="<?= (int)$editItem['stock'] ?>" min="0" required>
 
-                        <input type="file" 	name="image_file" accept=".jpg,.jpeg,.png,.webp">
-                        <input type="text" 	name="main_image" value="<?= e($editItem['main_image']) ?>" placeholder="Kosongkan jika tidak diubah">
+                        <input type="file"  name="image_file" accept=".jpg,.jpeg,.png,.webp">
+                        <input type="text"  name="main_image" value="<?= e($editItem['main_image']) ?>" placeholder="Kosongkan jika tidak diubah">
 
                         <textarea class="full" name="description"><?= e($editItem['description']) ?></textarea>
 
@@ -622,7 +678,7 @@ h1{font-size:1.6rem;font-weight:700;margin-bottom:12px;}
                         <button class="btn primary" type="submit">Simpan Perubahan</button>
                         <a class="btn" href="<?= e($BASE) ?>/seller/produk.php">Batal</a>
                         <span class="small-note">
-                            Jika admin sudah menyetujui, produk akan tampil di beranda NearBuy sesuai lokasi toko.
+                            Lokasi produk tetap mengikuti lokasi toko di menu <b>Set Lokasi</b>.
                         </span>
                     </div>
                 </form>
@@ -661,7 +717,7 @@ h1{font-size:1.6rem;font-weight:700;margin-bottom:12px;}
                                     } else {
                                         $src = 'https://via.placeholder.com/56?text=No+Img';
                                     }
-                                    $pid = (int)$it['id'];
+                                    $pid      = (int)$it['id'];
                                     $catNames = $catMap[$pid] ?? [];
                                 ?>
                                 <img class="thumb" src="<?= e($src) ?>" alt="">
@@ -672,6 +728,10 @@ h1{font-size:1.6rem;font-weight:700;margin-bottom:12px;}
                                         <span class="shop-pill">
                                             <?= e($it['shop_name'] ?? 'Toko') ?>
                                         </span>
+                                    </div>
+                                    <div class="small-note">
+                                        Lokasi toko: Lat <?= e((string)($it['latitude'] ?? '')) ?>,
+                                        Lng <?= e((string)($it['longitude'] ?? '')) ?>
                                     </div>
                                     <div class="small-note">
                                         <?= e(mb_strimwidth(trim($it['description'] ?? ''), 0, 70, '…', 'UTF-8')) ?>
@@ -706,7 +766,9 @@ h1{font-size:1.6rem;font-weight:700;margin-bottom:12px;}
                         <td class="action">
                             <a class="btn" href="<?= e($BASE) ?>/seller/produk.php?edit=<?= (int)$it['id'] ?>">Edit</a>
                             <form method="post" style="display:inline" onsubmit="return confirm('Hapus produk ini dari toko kamu?')">
-                                <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
+                                <?php if (function_exists('csrf_token')): ?>
+                                    <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
+                                <?php endif; ?>
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="id" value="<?= (int)$it['id'] ?>">
                                 <button class="btn" type="submit">Hapus</button>
@@ -720,6 +782,3 @@ h1{font-size:1.6rem;font-weight:700;margin-bottom:12px;}
 </section>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
-</main>
-</body>
-</html>

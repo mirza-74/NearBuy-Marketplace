@@ -62,7 +62,7 @@ if (!function_exists('upload_image_url')) {
   }
 }
 
-// [KATEGORI BARU] ===================== DAFTAR KATEGORI =====================
+// ===================== DAFTAR KATEGORI (Sidebar) =====================
 $categories = [];
 try {
     $stmtCat = $pdo->prepare("
@@ -73,10 +73,8 @@ try {
     $stmtCat->execute();
     $categories = $stmtCat->fetchAll(PDO::FETCH_ASSOC);
 } catch (Throwable $e) {
-    // Jika tabel belum ada, biarkan categories kosong
     $categories = [];
 }
-// [KATEGORI BARU] ==========================================================
 
 // ===================== BANNER UTAMA =====================
 $homeBannerPath = (function() use ($pdo, $BASE) {
@@ -96,38 +94,28 @@ $homeBannerPath = (function() use ($pdo, $BASE) {
     }
 })();
 
-// ===================== PRODUK KEBUTUHAN SEHARI HARI =====================
-// contoh slug kategori yang dianggap kebutuhan harian
-$dailySlugList = [
-    'beras',
-    'air-galon',
-    'gas-elpiji',
-    'bahan-pokok',
-    'makanan-minuman'
-];
-
+// ===================== FILTER DASAR PRODUK =====================
 // search sederhana untuk nama produk
 $searchQRaw = isset($_GET['q']) ? trim((string)$_GET['q']) : '';
 $searchQ    = mb_substr($searchQRaw, 0, 80);
 
-$where  = ["p.is_active = 1", "p.stock > 0", "u.role = 'seller'"];
+// HANYA: produk aktif, stok > 0, pemilik ber-role seller, toko aktif
+$whereParts = [
+    "p.is_active = 1",
+    "p.stock > 0",
+    "u.role = 'seller'",
+    "s.is_active = 1"
+];
 $params = [];
-
-// filter hanya kebutuhan sehari hari jika slug diset
-if (!empty($dailySlugList)) {
-    $inPlaceholders = implode(',', array_fill(0, count($dailySlugList), '?'));
-    $where[] = "c.slug IN ($inPlaceholders)";
-    foreach ($dailySlugList as $slug) {
-        $params[] = $slug;
-    }
-}
 
 // filter search jika ada
 if ($searchQ !== '') {
-    $where[] = "(p.title LIKE ? OR p.description LIKE ?)";
+    $whereParts[] = "(p.title LIKE ? OR p.description LIKE ?)";
     $params[] = "%{$searchQ}%";
     $params[] = "%{$searchQ}%";
 }
+
+$whereSql = implode(' AND ', $whereParts);
 
 // ===================== REKOMENDASI: PRODUK TERDEKAT =====================
 $rekom = [];
@@ -159,7 +147,7 @@ try {
             JOIN users u ON u.id = s.user_id
             LEFT JOIN product_categories pc ON pc.product_id = p.id
             LEFT JOIN categories c ON c.id = pc.category_id
-            WHERE " . implode(' AND ', $where) . "
+            WHERE {$whereSql}
             HAVING distance_km <= :radius
             ORDER BY distance_km ASC, p.created_at DESC
             LIMIT 8
@@ -170,6 +158,7 @@ try {
         $stmtRekom->bindValue(':user_lng', $userLng);
         $stmtRekom->bindValue(':radius', $radiusKm);
 
+        // bind param ? dari $params (search)
         $idx = 1;
         foreach ($params as $pVal) {
             $stmtRekom->bindValue($idx, $pVal);
@@ -196,7 +185,7 @@ try {
             JOIN users u ON u.id = s.user_id
             LEFT JOIN product_categories pc ON pc.product_id = p.id
             LEFT JOIN categories c ON c.id = pc.category_id
-            WHERE " . implode(' AND ', $where) . "
+            WHERE {$whereSql}
             ORDER BY p.created_at DESC
             LIMIT 8
         ";
@@ -205,7 +194,6 @@ try {
         $rekom = $stmtFb->fetchAll(PDO::FETCH_ASSOC);
     }
 } catch (Throwable $e) {
-    // jika struktur tabel belum lengkap, biarkan rekom kosong
     $rekom = [];
 }
 
@@ -227,7 +215,8 @@ try {
         JOIN users u ON u.id = s.user_id
         LEFT JOIN product_categories pc ON pc.product_id = p.id
         LEFT JOIN categories c ON c.id = pc.category_id
-        WHERE " . implode(' AND ', $where);
+        WHERE {$whereSql}
+    ";
 
     $stmtCnt = $pdo->prepare($countSql);
     $stmtCnt->execute($params);
@@ -245,7 +234,7 @@ try {
         JOIN users u ON u.id = s.user_id
         LEFT JOIN product_categories pc ON pc.product_id = p.id
         LEFT JOIN categories c ON c.id = pc.category_id
-        WHERE " . implode(' AND ', $where) . "
+        WHERE {$whereSql}
         ORDER BY p.created_at DESC
         LIMIT {$perPage} OFFSET {$offset}
     ";
@@ -279,7 +268,6 @@ try {
         $produk = $stmtDet->fetchAll(PDO::FETCH_ASSOC);
     }
 } catch (Throwable $e) {
-    // jika struktur tabel belum lengkap, biarkan produk kosong
     $produk = [];
 }
 ?>
@@ -302,9 +290,8 @@ try {
           maxlength="80"
           placeholder="Cari kebutuhan harian di sekitarmu">
         <button type="submit">
-  <i class="fa fa-search"></i>
-</button>
-
+          <i class="fa fa-search"></i>
+        </button>
       </form>
     </section>
     
@@ -414,7 +401,6 @@ try {
   </div>
 
   <aside class="sidebar">
-    
     <div class="card" style="padding:12px; margin-bottom: 20px;">
       <h4>Kategori Produk</h4>
       <?php if (!empty($categories)): ?>

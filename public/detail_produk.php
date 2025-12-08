@@ -1,6 +1,6 @@
 <?php
 // ===============================================================
-// NearBuy – Detail Produk (diperbarui: tampilkan jarak ke lokasi user)
+// NearBuy – Detail Produk (dengan jarak & tombol Google Maps)
 // ===============================================================
 declare(strict_types=1);
 
@@ -199,27 +199,48 @@ if (($userLat === null || $userLng === null) && $userId > 0) {
     }
 }
 
-// ---------- Hitung jarak ke toko (jika tersedia) ----------
-$distanceKm = null;
+// ---------- Hitung jarak ke toko (jika tersedia) + URL Google Maps ----------
+$distanceKm    = null;
 $distanceLabel = '';
-$shopLat = isset($product['shop_lat']) ? $product['shop_lat'] : null;
-$shopLng = isset($product['shop_lng']) ? $product['shop_lng'] : null;
-$shopName = $product['shop_name'] ?? null;
+$mapsUrl       = '';
+$shopLat       = isset($product['shop_lat']) ? $product['shop_lat'] : null;
+$shopLng       = isset($product['shop_lng']) ? $product['shop_lng'] : null;
+$shopName      = $product['shop_name'] ?? null;
 
-if ($userLat !== null && $userLng !== null && $shopLat !== null && $shopLng !== null) {
-    // pastikan numeric
-    if (is_numeric($shopLat) && is_numeric($shopLng)) {
-        $distanceKm = haversine_km((float)$userLat, (float)$userLng, (float)$shopLat, (float)$shopLng);
+$hasShopCoords = (is_numeric($shopLat) && is_numeric($shopLng));
+
+if ($hasShopCoords) {
+    $shopLatF = (float)$shopLat;
+    $shopLngF = (float)$shopLng;
+
+    // Jika lokasi user tersedia → buat rute
+    if ($userLat !== null && $userLng !== null) {
+        $distanceKm    = haversine_km((float)$userLat, (float)$userLng, $shopLatF, $shopLngF);
         $distanceLabel = format_distance_label($distanceKm);
+
+        $mapsUrl = sprintf(
+            'https://www.google.com/maps/dir/%F,%F/%F,%F/',
+            $userLat,
+            $userLng,
+            $shopLatF,
+            $shopLngF
+        );
+    } else {
+        // User belum set lokasi → buka pin toko saja
+        $mapsUrl = sprintf(
+            'https://www.google.com/maps/search/?api=1&query=%F,%F',
+            $shopLatF,
+            $shopLngF
+        );
     }
 }
 
 // ---------- Hitung promo ----------
-$hasPromo = (!is_null($product['compare_price']) && (float)$product['compare_price'] > (float)$product['price']);
-$price      = (float)$product['price'];
-$compare    = (float)($product['compare_price'] ?? 0);
-$stock      = (int)$product['stock'];
-$badgeText  = $hasPromo ? 'Promo spesial' : 'Produk';
+$hasPromo  = (!is_null($product['compare_price']) && (float)$product['compare_price'] > (float)$product['price']);
+$price     = (float)$product['price'];
+$compare   = (float)($product['compare_price'] ?? 0);
+$stock     = (int)$product['stock'];
+$badgeText = $hasPromo ? 'Promo spesial' : 'Produk';
 
 // ---------- Logika ULASAN ----------
 $currentUser    = $_SESSION['user'] ?? null;
@@ -417,24 +438,46 @@ try {
           <span class="value">#<?= (int)$productId ?></span>
         </div>
 
-        <!-- TAMPILKAN NAMA TOKO & JARAK (JIKA ADA) -->
+        <!-- Nama toko -->
         <?php if (!empty($shopName)): ?>
           <div class="detail-meta-item">
             <span class="label">Toko</span>
-            <span class="value"><?= e($shopName) ?><?php if (!empty($product['shop_address'])): ?> · <?= e($product['shop_address']) ?><?php endif; ?></span>
+            <span class="value">
+              <?= e($shopName) ?>
+              <?php if (!empty($product['shop_address'])): ?>
+                · <?= e($product['shop_address']) ?>
+              <?php endif; ?>
+            </span>
           </div>
         <?php endif; ?>
 
-        <?php if ($distanceLabel !== ''): ?>
-          <div class="detail-meta-item">
-            <span class="label">Jarak</span>
-            <span class="value"><?= e($distanceLabel) ?></span>
-          </div>
-        <?php else: ?>
+        <!-- Jarak + Link Google Maps -->
+        <?php if ($hasShopCoords): ?>
           <div class="detail-meta-item">
             <span class="label">Jarak</span>
             <span class="value">
-              <a href="<?= e($BASE) ?>/profil.php">Atur lokasi di Profil</a>
+              <?php if ($distanceLabel !== ''): ?>
+                <?= e($distanceLabel) ?>
+              <?php else: ?>
+                Lokasi Anda belum diatur.
+              <?php endif; ?>
+            </span>
+          </div>
+          <?php if ($mapsUrl !== ''): ?>
+            <div class="detail-meta-item">
+              <span class="label">Lokasi</span>
+              <span class="value">
+                <a href="<?= e($mapsUrl) ?>" target="_blank" rel="noopener noreferrer" class="btn-maps">
+                  Lihat di Google Maps
+                </a>
+              </span>
+            </div>
+          <?php endif; ?>
+        <?php else: ?>
+          <div class="detail-meta-item">
+            <span class="label">Lokasi</span>
+            <span class="value">
+              Lokasi toko belum diatur.
             </span>
           </div>
         <?php endif; ?>
