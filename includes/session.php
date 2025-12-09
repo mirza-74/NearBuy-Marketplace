@@ -40,9 +40,20 @@ if (!function_exists('csrf_token')) {
 }
 
 if (!function_exists('csrf_verify')) {
-  function csrf_verify(?string $token): bool {
+  function csrf_verify(?string $token = null): bool {
+    // kalau token tidak dikirim sebagai argumen, ambil dari POST
+    if ($token === null) {
+      // dukung dua nama field sekaligus: 'csrf' dan 'csrf_token'
+      $token = $_POST['csrf'] ?? $_POST['csrf_token'] ?? null;
+    }
+
     $sess = $_SESSION['csrf'] ?? '';
-    return is_string($token) && is_string($sess) && hash_equals($sess, $token);
+
+    return is_string($token)
+      && is_string($sess)
+      && $token !== ''
+      && $sess !== ''
+      && hash_equals($sess, $token);
   }
 }
 

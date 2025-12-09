@@ -352,6 +352,21 @@ try {
 ?>
 <div class="detail-page">
 
+  <?php if (!empty($_SESSION['flash'])): ?>
+    <div class="nb-flash">
+      <?php
+        $flash = $_SESSION['flash'];
+        unset($_SESSION['flash']);
+
+        if (is_array($flash)) {
+            echo e($flash['message'] ?? 'Terjadi kesalahan');
+        } else {
+            echo e((string)$flash);
+        }
+      ?>
+    </div>
+  <?php endif; ?>
+
   <!-- Breadcrumb sederhana -->
   <nav class="detail-breadcrumb">
     <a href="<?= e($BASE) ?>/index.php">Beranda</a>
@@ -502,7 +517,7 @@ try {
             </div>
           </form>
 
-          <form method="post" action="<?= e($BASE) ?>/buy_now.php" class="detail-form-inline">
+          <form method="post" action="<?= e($BASE) ?>/pesan.php" class="detail-form-inline">
             <?php if (function_exists('csrf_input')) { csrf_input(); } ?>
             <input type="hidden" name="product_id" value="<?= (int)$productId ?>">
             <input type="hidden" name="qty" value="1">
