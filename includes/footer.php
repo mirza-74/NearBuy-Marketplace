@@ -57,9 +57,9 @@ if (!isset($BASE) || !$BASE) {
         <li>Lokasi: Bangka Belitung, Indonesia</li>
       </ul>
       <div class="social-links">
-        <a href="#"><img src="<?= e($BASE) ?>/assets/icon-fb.svg" alt="Facebook"></a>
-        <a href="#"><img src="<?= e($BASE) ?>/assets/icon-ig.svg" alt="Instagram"></a>
-        <a href="#"><img src="<?= e($BASE) ?>/assets/icon-x.svg" alt="X"></a>
+        <a href="#"><img src="<?= e($BASE) ?>/assets/Facebook.png" alt="Facebook"></a>
+        <a href="#"><img src="<?= e($BASE) ?>/assets/instagram.png" alt="Instagram"></a>
+        <a href="#"><img src="<?= e($BASE) ?>/assets/X.png" alt="X"></a>
       </div>
     </div>
   </div>

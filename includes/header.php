@@ -153,9 +153,7 @@ if ($user && in_array($role, ['pengguna', 'seller'], true)) {
           <i class="fa-solid fa-circle-info"></i> <span>Tentang</span>
         </a>
 
-        <a href="<?= e($BASE) ?>/kontak.php">
-          <i class="fa-solid fa-headset"></i> <span>Kontak</span>
-        </a>
+        
 
         <a href="<?= e($BASE) ?>/register.php">
           <i class="fa-solid fa-user-plus"></i> <span>Daftar</span>
