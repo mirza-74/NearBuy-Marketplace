@@ -149,7 +149,7 @@ $stmtShop = $pdo->prepare("
         latitude,
         longitude,
         product_limit,
-        package_status,
+        subscription_status,
         is_active
     FROM shops
     WHERE user_id = ?
@@ -167,7 +167,7 @@ foreach ($shopsRaw as $s) {
     $sid           = (int)$s['id'];
     $shopById[$sid] = $s;
 
-    if ((int)$s['is_active'] === 1 && ($s['package_status'] ?? 'none') === 'active') {
+    if ((int)$s['is_active'] === 1 && ($s['subscription_status'] ?? 'none') === 'active') {
         $sellerShops[] = $s;
         $limit = (int)($s['product_limit'] ?? 0);
         if ($limit > 0) {
@@ -242,7 +242,7 @@ try {
         $checkShop = $pdo->prepare("
             SELECT id 
             FROM shops 
-            WHERE id = ? AND user_id = ? AND is_active = 1 AND package_status = 'active'
+            WHERE id = ? AND user_id = ? AND is_active = 1 AND subscription_status = 'active'
             LIMIT 1
         ");
         $checkShop->execute([$shopId, $sellerId]);

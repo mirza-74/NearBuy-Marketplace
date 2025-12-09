@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 08, 2025 at 02:38 PM
+-- Generation Time: Dec 09, 2025 at 10:14 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -76,6 +76,7 @@ CREATE TABLE `carts` (
 --
 
 INSERT INTO `carts` (`id`, `user_id`, `status`, `created_at`, `updated_at`) VALUES
+(0, 7, 'active', '2025-12-09 06:49:09', NULL),
 (2, 2, 'ordered', '2025-11-13 08:14:12', '2025-11-13 09:27:03'),
 (3, 2, 'ordered', '2025-11-13 09:57:37', '2025-11-13 20:24:39'),
 (4, 2, 'ordered', '2025-11-14 08:30:43', '2025-11-14 08:32:44'),
@@ -106,6 +107,7 @@ CREATE TABLE `cart_items` (
 --
 
 INSERT INTO `cart_items` (`id`, `cart_id`, `product_id`, `variant_id`, `qty`, `price`, `created_at`, `updated_at`) VALUES
+(0, 0, 5, NULL, 1, 15000.00, '2025-12-09 06:49:09', NULL),
 (1, 2, 1, NULL, 2, 160000.00, '2025-11-13 08:14:13', '2025-11-13 09:26:34'),
 (3, 3, 1, NULL, 1, 160000.00, '2025-11-13 18:24:46', '2025-11-13 20:16:37'),
 (4, 4, 1, NULL, 1, 160000.00, '2025-11-14 08:30:43', '2025-11-14 08:32:16'),
@@ -181,10 +183,21 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`id`, `user_id`, `cart_id`, `total_items`, `total_barang`, `total_ongkir`, `total_pajak_admin`, `total_diskon`, `grand_total`, `payment_method`, `note`, `ship_name`, `ship_phone`, `ship_address`, `ship_city`, `ship_province`, `ship_postal_code`, `status`, `created_at`, `updated_at`) VALUES
+(0, 4, NULL, 1, 15000.00, 0.00, 1500.00, 0.00, 16500.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'menunggu_pembayaran', '2025-12-09 07:07:09', NULL),
 (1, 2, 3, 1, 160000.00, 15000.00, 1500.00, 0.00, 176500.00, 'bca_va', '', 'Miru', '09887654', '', 'Bangka Belitung', '', '', 'diproses', '2025-11-13 20:24:38', '2025-11-13 20:30:57'),
 (2, 2, 4, 1, 160000.00, 15000.00, 1500.00, 0.00, 176500.00, 'bca_va', '', 'Miru', '09887654', '', 'Bangka Belitung', '', '', 'selesai', '2025-11-14 08:32:44', '2025-11-28 09:40:39'),
 (3, 3, 5, 1, 160000.00, 15000.00, 1500.00, 0.00, 176500.00, 'alfamart', '', 'Mirza', '087478476', '', 'Pangkalpinang', '', '', 'selesai', '2025-11-14 09:11:04', '2025-11-28 09:40:32'),
-(4, 3, 6, 1, 25000.00, 15000.00, 1500.00, 0.00, 41500.00, 'bca_va', '', 'Mirza', '087478476', '', 'Pangkalpinang', '', '', 'dibatalkan', '2025-11-14 09:17:43', '2025-11-27 10:11:43');
+(4, 3, 6, 1, 25000.00, 15000.00, 1500.00, 0.00, 41500.00, 'bca_va', '', 'Mirza', '087478476', '', 'Pangkalpinang', '', '', 'dibatalkan', '2025-11-14 09:17:43', '2025-11-27 10:11:43'),
+(5, 4, NULL, 1, 15000.00, 0.00, 1500.00, 0.00, 16500.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'menunggu_pembayaran', '2025-12-09 07:24:34', NULL),
+(6, 4, NULL, 1, 15000.00, 0.00, 1500.00, 0.00, 16500.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'selesai', '2025-12-09 07:28:14', '2025-12-09 08:20:25'),
+(7, 4, NULL, 1, 15000.00, 0.00, 1500.00, 0.00, 16500.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'menunggu_pembayaran', '2025-12-09 07:39:34', NULL),
+(8, 4, NULL, 1, 15000.00, 0.00, 1500.00, 0.00, 16500.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'selesai', '2025-12-09 07:39:59', '2025-12-09 08:13:54'),
+(9, 4, NULL, 1, 15000.00, 0.00, 1500.00, 0.00, 16500.00, 'cod', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'selesai', '2025-12-09 07:56:37', '2025-12-09 08:10:44'),
+(10, 4, NULL, 1, 12000.00, 0.00, 1500.00, 0.00, 13500.00, 'cod', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'menunggu_pembayaran', '2025-12-09 08:08:23', NULL),
+(11, 6, NULL, 1, 15000.00, 0.00, 1500.00, 0.00, 16500.00, 'cod', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'menunggu_pembayaran', '2025-12-09 08:21:55', NULL),
+(12, 4, NULL, 1, 12000.00, 0.00, 1500.00, 0.00, 13500.00, 'cod', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'menunggu_pembayaran', '2025-12-09 08:23:00', NULL),
+(13, 4, NULL, 1, 12000.00, 0.00, 1500.00, 0.00, 13500.00, 'cod', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'menunggu_pembayaran', '2025-12-09 08:23:58', NULL),
+(14, 3, NULL, 1, 16000.00, 0.00, 1500.00, 0.00, 17500.00, 'cod', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'menunggu_pembayaran', '2025-12-09 09:09:03', NULL);
 
 -- --------------------------------------------------------
 
@@ -211,10 +224,21 @@ CREATE TABLE `order_items` (
 --
 
 INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `variant_id`, `title`, `qty`, `price`, `subtotal`, `admin_fee_per_item`, `admin_fee_total`, `created_at`) VALUES
+(0, 0, 5, NULL, 'Baju Polos', 1, 15000.00, 15000.00, 1500.00, 1500.00, '2025-12-09 07:07:09'),
 (1, 1, 1, NULL, 'Lollipop - SUSS16 Tumbler Straw Cup 750ml (Insulated Bottle | Stainless Steel Tumbler / SUS 316)', 1, 160000.00, 160000.00, 1500.00, 1500.00, '2025-11-13 20:24:39'),
 (2, 2, 1, NULL, 'Lollipop - SUSS16 Tumbler Straw Cup 750ml (Insulated Bottle | Stainless Steel Tumbler / SUS 316)', 1, 160000.00, 160000.00, 1500.00, 1500.00, '2025-11-14 08:32:44'),
 (3, 3, 1, NULL, 'Lollipop - SUSS16 Tumbler Straw Cup 750ml (Insulated Bottle | Stainless Steel Tumbler / SUS 316)', 1, 160000.00, 160000.00, 1500.00, 1500.00, '2025-11-14 09:11:04'),
-(4, 4, 2, NULL, 'Baju', 1, 25000.00, 25000.00, 1500.00, 1500.00, '2025-11-14 09:17:43');
+(4, 4, 2, NULL, 'Baju', 1, 25000.00, 25000.00, 1500.00, 1500.00, '2025-11-14 09:17:43'),
+(5, 5, 5, NULL, 'Baju Polos', 1, 15000.00, 15000.00, 1500.00, 1500.00, '2025-12-09 07:24:34'),
+(6, 6, 5, NULL, 'Baju Polos', 1, 15000.00, 15000.00, 1500.00, 1500.00, '2025-12-09 07:28:14'),
+(7, 7, 5, NULL, 'Baju Polos', 1, 15000.00, 15000.00, 1500.00, 1500.00, '2025-12-09 07:39:34'),
+(8, 8, 5, NULL, 'Baju Polos', 1, 15000.00, 15000.00, 1500.00, 1500.00, '2025-12-09 07:39:59'),
+(9, 9, 5, NULL, 'Baju Polos', 1, 15000.00, 15000.00, 1500.00, 1500.00, '2025-12-09 07:56:37'),
+(10, 10, 4, NULL, 'Galon', 1, 12000.00, 12000.00, 1500.00, 1500.00, '2025-12-09 08:08:23'),
+(11, 11, 5, NULL, 'Baju Polos', 1, 15000.00, 15000.00, 1500.00, 1500.00, '2025-12-09 08:21:55'),
+(12, 12, 4, NULL, 'Galon', 1, 12000.00, 12000.00, 1500.00, 1500.00, '2025-12-09 08:23:00'),
+(13, 13, 4, NULL, 'Galon', 1, 12000.00, 12000.00, 1500.00, 1500.00, '2025-12-09 08:23:58'),
+(14, 14, 6, NULL, 'Beras', 1, 16000.00, 16000.00, 1500.00, 1500.00, '2025-12-09 09:09:03');
 
 -- --------------------------------------------------------
 
@@ -248,8 +272,9 @@ CREATE TABLE `products` (
 
 INSERT INTO `products` (`id`, `shop_id`, `seller_id`, `title`, `slug`, `description`, `price`, `compare_price`, `discount`, `stock`, `sku`, `is_active`, `popularity`, `is_promo`, `main_image`, `created_at`, `updated_at`) VALUES
 (3, 3, 6, 'Baju', 'baju', 'Baju Open Custom', 10000.00, NULL, 0, 10, NULL, 1, 0, 0, NULL, '2025-12-08 12:18:57', '2025-12-08 12:27:20'),
-(4, 3, 6, 'Galon', 'galon', '15 liter', 12000.00, NULL, 0, 20, NULL, 1, 0, 0, NULL, '2025-12-08 12:46:31', '2025-12-08 12:47:07'),
-(5, 2, 4, 'Baju Polos', 'baju-polos', '', 15000.00, NULL, 0, 50, NULL, 1, 0, 0, 'products/product_20251208_140334_103680.jpg', '2025-12-08 13:03:34', '2025-12-08 13:04:46');
+(4, 3, 6, 'Galon', 'galon', '15 liter', 12000.00, NULL, 0, 17, NULL, 1, 0, 0, NULL, '2025-12-08 12:46:31', '2025-12-09 08:23:58'),
+(5, 2, 4, 'Baju Polos', 'baju-polos', '', 15000.00, NULL, 0, 43, NULL, 1, 0, 0, 'products/product_20251208_140334_103680.jpg', '2025-12-08 13:03:34', '2025-12-09 08:21:55'),
+(6, 4, 8, 'Beras', 'beras', 'Harga tertera adalah harga per 1 kilogram', 16000.00, NULL, 0, 9, NULL, 1, 0, 0, NULL, '2025-12-09 08:58:28', '2025-12-09 09:09:03');
 
 -- --------------------------------------------------------
 
@@ -341,7 +366,8 @@ CREATE TABLE `shops` (
   `latitude` decimal(10,7) NOT NULL,
   `longitude` decimal(10,7) NOT NULL,
   `description` text DEFAULT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `logo` varchar(255) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
   `package_code` varchar(20) DEFAULT NULL,
@@ -350,17 +376,19 @@ CREATE TABLE `shops` (
   `package_started_at` datetime DEFAULT NULL,
   `package_expires_at` datetime DEFAULT NULL,
   `product_limit` int(11) DEFAULT 0,
-  `subscription_status` enum('none','waiting_payment','active','expired') NOT NULL DEFAULT 'none'
+  `subscription_status` enum('none','waiting_payment','active','expired') NOT NULL DEFAULT 'none',
+  `has_qris` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `shops`
 --
 
-INSERT INTO `shops` (`id`, `user_id`, `name`, `address`, `latitude`, `longitude`, `description`, `is_active`, `created_at`, `updated_at`, `package_code`, `last_payment_proof`, `package_status`, `package_started_at`, `package_expires_at`, `product_limit`, `subscription_status`) VALUES
-(1, 3, 'Toko Contoh NearBuy', 'Pangkalpinang', -2.1291000, 106.1090000, 'Toko contoh kebutuhan harian di sekitar Pangkalpinang', 1, '2025-12-01 17:46:36', NULL, NULL, NULL, 'none', NULL, NULL, 0, 'none'),
-(2, 4, 'Warung Rama', 'Pangkalpinang', -2.1291000, 106.1090000, 'Menyediakan Pulsa, Token Listrik, Isi Ulang Paket Internet dan kebutuhan smartphone Anda', 1, '2025-12-06 07:14:34', '2025-12-08 12:19:36', 'Paket Starter', '/NearBuy-Marketplace/public/uploads/payment_proofs/2_1765191092.png', 'active', '2025-12-08 19:19:36', '2026-01-07 19:19:36', 15, 'active'),
-(3, 6, 'Mirru\'s Store', 'Jl Brig Hasan Basri Kec Amuntai Tengan Kab. HSU', -999.9999999, -999.9999999, 'Jual atau Jasa Top Up Game', 1, '2025-12-06 19:11:33', '2025-12-08 13:01:06', 'Paket Premium', '/NearBuy-Marketplace/public/uploads/payment_proofs/3_1765193269.png', 'active', '2025-12-08 18:39:05', '2026-01-07 18:39:05', 9999, 'active');
+INSERT INTO `shops` (`id`, `user_id`, `name`, `address`, `latitude`, `longitude`, `description`, `logo`, `is_active`, `created_at`, `updated_at`, `package_code`, `last_payment_proof`, `package_status`, `package_started_at`, `package_expires_at`, `product_limit`, `subscription_status`, `has_qris`) VALUES
+(1, 3, 'Toko Contoh NearBuy', 'Pangkalpinang', -2.1291000, 106.1090000, 'Toko contoh kebutuhan harian di sekitar Pangkalpinang', NULL, 1, '2025-12-01 17:46:36', NULL, NULL, NULL, 'none', NULL, NULL, 0, 'none', 0),
+(2, 4, 'Warung Rama', 'Pangkalpinang', -2.1291000, 106.1090000, 'Menyediakan Pulsa, Token Listrik, Isi Ulang Paket Internet dan kebutuhan smartphone Anda', NULL, 1, '2025-12-06 07:14:34', '2025-12-08 12:19:36', 'Paket Starter', '/NearBuy-Marketplace/public/uploads/payment_proofs/2_1765191092.png', 'active', '2025-12-08 19:19:36', '2026-01-07 19:19:36', 15, 'active', 0),
+(3, 6, 'Mirru\'s Store', 'Jl Brig Hasan Basri Kec Amuntai Tengan Kab. HSU', -999.9999999, -999.9999999, 'Jual atau Jasa Top Up Game', NULL, 1, '2025-12-06 19:11:33', '2025-12-08 13:01:06', 'Paket Premium', '/NearBuy-Marketplace/public/uploads/payment_proofs/3_1765193269.png', 'active', '2025-12-08 18:39:05', '2026-01-07 18:39:05', 9999, 'active', 0),
+(4, 8, 'Warung Serba Ada', 'Jl Palembang', -3.0472684, 104.7491455, NULL, NULL, 1, '2025-12-09 08:37:46', '2025-12-09 08:48:46', 'Paket Premium', '/NearBuy-Marketplace/public/uploads/payment_proofs/4_1765269548.png', 'waiting_payment', NULL, NULL, 99999, 'active', 0);
 
 -- --------------------------------------------------------
 
@@ -434,7 +462,8 @@ INSERT INTO `users` (`id`, `full_name`, `email`, `phone`, `gender`, `birth_date`
 (4, 'Ramama', 'Ramama@gmail.com', '085369410097', 'male', '2002-05-22', 'Jl. Melati', 'gabek', 'Bangka Belitung', '45677', '$2y$10$MhhrQAQXYkF7xOHjRslDpeACFHnKVxH1XoEYBSmx324F24Dqc1Jqm', 'seller', 1, '2025-12-05 16:58:22', '2025-12-08 12:47:48', 0, -2.0912294, 106.1111927),
 (5, 'Admin', 'Admin123@gmail.com', '08879874982', 'female', NULL, 'Jl Bukit Tani', 'Pangkalpinang', 'Bangka Belitung', '45677', '$2y$10$iKnrRirrT66NFteWXOpMrOON.Kr.iWNCEd030C1t/CPVhYxGMUm6S', 'admin', 1, '2025-12-06 17:00:57', NULL, 0, NULL, NULL),
 (6, 'Okta', 'okta123@gmail.com', '085369410097', 'male', '2004-10-31', '-', '-', '-', '45677', '$2y$10$9qT7OmtTpKYYuN0TkrBdpe2R3e6BAU5.ICRogGrJFvz7L9TEG7cvm', 'seller', 1, '2025-12-06 19:07:23', '2025-12-08 12:45:33', 0, -2.1001927, 106.1298180),
-(7, 'Miru123', 'Miru123@gmail.com', '08907956465', 'male', '2010-04-07', 'Jl. Batik Tikal', 'Pangkalpinang', 'Bangka Belitung', '45677', '$2y$10$Oewc33Kdy3lSzcK3NdzyC.6e1S3EFsaBfzaaoo6MC0t04GI0OvBMu', 'pengguna', 1, '2025-12-08 13:06:41', '2025-12-08 13:07:06', 0, -2.9655040, 104.7494656);
+(7, 'Miru123', 'Miru123@gmail.com', '08907956465', 'male', '2010-04-07', 'Jl. Batik Tikal', 'Pangkalpinang', 'Bangka Belitung', '45677', '$2y$10$Oewc33Kdy3lSzcK3NdzyC.6e1S3EFsaBfzaaoo6MC0t04GI0OvBMu', 'pengguna', 1, '2025-12-08 13:06:41', '2025-12-09 06:47:55', 0, -2.0701156, 106.0757863),
+(8, 'Mmm', 'mmm123@gmail.com', '089868758', 'male', '2009-03-16', 'Jl Mawar', 'Pangkalpinang', 'Bangka Belitung', '22422', '$2y$10$2I8ZyUp/oYRjhLFSh9f2nOGXfQcDZcqioQG4gz/aZoaB1LCSc8lsy', 'seller', 1, '2025-12-09 08:27:36', '2025-12-09 08:38:16', 0, -2.7256690, 104.7054310);
 
 -- --------------------------------------------------------
 
@@ -668,13 +697,13 @@ ALTER TABLE `admin_notifications`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `shops`
 --
 ALTER TABLE `shops`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `transactions`
@@ -686,7 +715,7 @@ ALTER TABLE `transactions`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- Constraints for dumped tables

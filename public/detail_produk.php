@@ -4,7 +4,9 @@
 // ===============================================================
 declare(strict_types=1);
 
-$BASE = '/NearBuy-marketplace/public';
+// BASE otomatis sesuai folder project (tanpa hardcode)
+$scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+$BASE = rtrim($scriptDir, '/');
 
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/db.php';
@@ -37,7 +39,7 @@ if (!function_exists('is_https_url')) {
 if (!function_exists('join_url')) {
     function join_url(...$segments): string {
         $s = implode('/', array_map(fn($x) => trim((string)$x, '/'), $segments));
-        return '/'.$s;
+        return '/' . $s;
     }
 }
 if (!function_exists('upload_image_url')) {
@@ -79,7 +81,7 @@ if (!function_exists('format_distance_label')) {
 // ---------- Ambil slug ----------
 $slug = trim((string)($_GET['slug'] ?? ''));
 if ($slug === '') {
-    header('Location: '.$BASE.'/index.php');
+    header('Location: ' . $BASE . '/index.php');
     exit;
 }
 
@@ -439,7 +441,7 @@ try {
         <div class="detail-meta-item">
           <span class="label">Stok</span>
           <span class="value <?= $stock > 0 ? 'in-stock' : 'out-stock' ?>">
-            <?= $stock > 0 ? 'Tersedia ('.$stock.' pcs)' : 'Habis' ?>
+            <?= $stock > 0 ? 'Tersedia (' . $stock . ' pcs)' : 'Habis' ?>
           </span>
         </div>
         <?php if ((int)$product['variant_count'] > 0): ?>
@@ -501,7 +503,8 @@ try {
 
       <?php if ($stock > 0): ?>
         <div class="detail-buy-box">
-          <form method="post" action="<?= e($BASE) ?>/add_to_cart.php" class="detail-form">
+          <!-- Hanya satu form: Pesan Sekarang -->
+          <form method="post" action="<?= e($BASE) ?>/pesan.php" class="detail-form">
             <?php if (function_exists('csrf_input')) { csrf_input(); } ?>
             <input type="hidden" name="product_id" value="<?= (int)$productId ?>">
 
@@ -510,13 +513,11 @@ try {
               <input id="qty" type="number" name="qty" min="1" max="<?= $stock ?>" value="1">
             </div>
 
-          <form method="post" action="<?= e($BASE) ?>/pesan.php" class="detail-form-inline">
-            <?php if (function_exists('csrf_input')) { csrf_input(); } ?>
-            <input type="hidden" name="product_id" value="<?= (int)$productId ?>">
-            <input type="hidden" name="qty" value="1">
-            <button type="submit" class="btn-secondary">
-              Pesan Sekarang
-            </button>
+            <div class="detail-buttons">
+              <button type="submit" class="btn-secondary">
+                Pesan Sekarang
+              </button>
+            </div>
           </form>
         </div>
       <?php else: ?>
@@ -614,7 +615,7 @@ try {
         <?php foreach ($relatedProducts as $rp): 
           $rImg = upload_image_url($rp['main_image'] ?? null, $BASE);
           $rHasPromo = (!is_null($rp['compare_price']) && (float)$rp['compare_price'] > (float)$rp['price']);
-          $rDetailUrl = $BASE.'/detail_produk.php?slug='.urlencode($rp['slug']);
+          $rDetailUrl = $BASE . '/detail_produk.php?slug=' . urlencode($rp['slug']);
         ?>
           <a href="<?= e($rDetailUrl) ?>" class="detail-rel-card">
             <div class="detail-rel-img-wrap">

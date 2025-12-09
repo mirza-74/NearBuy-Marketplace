@@ -174,7 +174,7 @@ unset($_SESSION['flash']);
 
       // status paket / langganan
       $pkgCode   = $shop['package_code']   ?? null;
-      $pkgStatus = $shop['package_status'] ?? null;
+      $pkgStatus = $shop['subscription_status'] ?? null;
       $limitProd = (int)($shop['product_limit'] ?? 0);
 
       $pkgText  = 'Belum memilih paket';

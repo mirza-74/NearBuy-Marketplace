@@ -9,7 +9,6 @@ declare(strict_types=1);
 $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
 $BASE = preg_replace('~/admin$~', '', rtrim($scriptDir, '/'));
 
-// includes
 require_once __DIR__ . '/../../includes/session.php';
 require_once __DIR__ . '/../../includes/db.php';
 
@@ -28,312 +27,218 @@ if (!function_exists('e')) {
 }
 
 // ===============================================================
-// PROSES POST: SETUJUI / TOLAK TOKO, PEMBAYARAN, PRODUK
+// PROCESS ACTIONS
 // ===============================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $action = $_POST['action'] ?? '';
-  $id     = isset($_POST['shop_id']) ? (int)$_POST['shop_id'] : 0; // dipakai generic untuk shop / product
+  $id     = isset($_POST['shop_id']) ? (int)$_POST['shop_id'] : 0;
 
-  $allowedActions = [
-    'approve_shop',
-    'reject_shop',
-    'approve_payment',
-    'reject_payment',
-    'approve_product',
-    'reject_product',
+  $allowed = [
+    'approve_shop','reject_shop',
+    'approve_payment','reject_payment',
+    'approve_product','reject_product'
   ];
 
-  if ($id <= 0 || !in_array($action, $allowedActions, true)) {
-    $_SESSION['flash_admin'] = 'Permintaan tidak valid (action="' . $action . '", id=' . $id . ').';
+  if ($id <= 0 || !in_array($action, $allowed, true)) {
+    $_SESSION['flash_admin'] = "Permintaan tidak valid.";
     header("Location: {$BASE}/admin/index.php");
     exit;
   }
 
-  // ====== SETUJUI TOKO (Aktivasi) ======
+  // ====== Approve shop ======
   if ($action === 'approve_shop') {
     try {
       $pdo->beginTransaction();
 
-      // 1) Toko diaktifkan (is_active = 1)
-      $stmt = $pdo->prepare("UPDATE shops SET is_active = 1 WHERE id = ? LIMIT 1");
-      $stmt->execute([$id]);
+      $pdo->prepare("UPDATE shops SET is_active=1 WHERE id=? LIMIT 1")
+          ->execute([$id]);
 
-      // 2) Role user pemilik toko jadi 'seller'
-      $stmtU = $pdo->prepare("
-        UPDATE users u
-        JOIN shops s ON s.user_id = u.id
-        SET u.role = 'seller'
-        WHERE s.id = ?
+      $pdo->prepare("
+        UPDATE users u JOIN shops s ON s.user_id=u.id
+        SET u.role='seller'
+        WHERE s.id=?
         LIMIT 1
-      ");
-      $stmtU->execute([$id]);
+      ")->execute([$id]);
 
       $pdo->commit();
-      $_SESSION['flash_admin'] = "Toko ID {$id} berhasil disetujui. Seller sekarang ber-role 'seller'.";
-
+      $_SESSION['flash_admin'] = "Toko ID {$id} berhasil disetujui.";
     } catch (Throwable $e) {
-      if ($pdo->inTransaction()) {
-        $pdo->rollBack();
-      }
-      $_SESSION['flash_admin'] = "Gagal menyetujui toko: " . $e->getMessage();
+      if ($pdo->inTransaction()) $pdo->rollBack();
+      $_SESSION['flash_admin'] = "Gagal: ".$e->getMessage();
     }
-
     header("Location: {$BASE}/admin/index.php");
     exit;
   }
 
-  // ====== TOLAK TOKO ======
+  // ====== Reject shop ======
   if ($action === 'reject_shop') {
-    try {
-      // misal pakai is_active = 2 sebagai status "ditolak"
-      $stmt = $pdo->prepare("UPDATE shops SET is_active = 2 WHERE id = ? LIMIT 1");
-      $stmt->execute([$id]);
-
-      $_SESSION['flash_admin'] = "Toko ID {$id} telah ditandai sebagai ditolak.";
-    } catch (Throwable $e) {
-      $_SESSION['flash_admin'] = "Gagal menolak toko: " . $e->getMessage();
-    }
-
+    $pdo->prepare("UPDATE shops SET is_active=2 WHERE id=? LIMIT 1")
+        ->execute([$id]);
+    $_SESSION['flash_admin'] = "Toko ID {$id} ditolak.";
     header("Location: {$BASE}/admin/index.php");
     exit;
   }
 
-  // ====== SETUJUI PEMBAYARAN LANGGANAN (ACC) ======
+  // ====== Approve payment ======
   if ($action === 'approve_payment') {
     try {
-      // 1. Ambil package_code yang tersimpan saat seller upload bukti
-      $stmt = $pdo->prepare("SELECT package_code FROM shops WHERE id = ? LIMIT 1");
+      $stmt = $pdo->prepare("SELECT package_code FROM shops WHERE id=? LIMIT 1");
       $stmt->execute([$id]);
-      $shopData = $stmt->fetch(PDO::FETCH_ASSOC);
+      $shop = $stmt->fetch(PDO::FETCH_ASSOC);
 
-      if (!$shopData || empty($shopData['package_code'])) {
-        $_SESSION['flash_admin'] = "Gagal menyetujui pembayaran: Data paket untuk Toko ID {$id} tidak ditemukan.";
+      if (!$shop || empty($shop['package_code'])) {
+        $_SESSION['flash_admin'] = "Data paket tidak valid.";
         header("Location: {$BASE}/admin/index.php");
         exit;
       }
 
-      $packageCode     = $shopData['package_code'];
-      $newProductLimit = 0;
+      $pkg = $shop['package_code'];
+      $limit = 0;
 
-      // 2. Tentukan batas produk berdasarkan nama paket
-      if (strcasecmp($packageCode, 'Paket Starter') === 0 || strcasecmp($packageCode, 'Paket A') === 0) {
-        $newProductLimit = 15;     // Starter
-      } elseif (strcasecmp($packageCode, 'Paket Premium') === 0 || strcasecmp($packageCode, 'Paket B') === 0) {
-        $newProductLimit = 99999;  // Premium (praktis tanpa batas)
-      }
-      // Tambah mapping paket lain di sini jika ada
+      if (stripos($pkg,'starter') !== false || stripos($pkg,'A')!==false) $limit = 15;
+      if (stripos($pkg,'premium') !== false || stripos($pkg,'B')!==false) $limit = 99999;
 
-      // 3. Update status langganan dan product_limit
-      $stmt = $pdo->prepare("
-        UPDATE shops SET 
-          subscription_status = 'active', 
-          product_limit       = ?, 
-          updated_at          = NOW() 
-        WHERE id = ? 
-        LIMIT 1
-      ");
-      $stmt->execute([$newProductLimit, $id]);
+      $pdo->prepare("
+        UPDATE shops SET
+          subscription_status='active',
+          product_limit=?,
+          updated_at=NOW()
+        WHERE id=? LIMIT 1
+      ")->execute([$limit,$id]);
 
-      $_SESSION['flash_admin'] = "Pembayaran Toko ID {$id} berhasil disetujui. Langganan {$packageCode} diaktifkan dengan batas {$newProductLimit} produk.";
-    } catch (Throwable $e) {
-      $_SESSION['flash_admin'] = "Gagal menyetujui pembayaran: " . $e->getMessage();
+      $_SESSION['flash_admin'] = "Paket $pkg disetujui.";
+    } catch(Throwable $e) {
+      $_SESSION['flash_admin'] = "Gagal: ".$e->getMessage();
     }
 
     header("Location: {$BASE}/admin/index.php");
     exit;
   }
 
-  // ====== TOLAK PEMBAYARAN LANGGANAN ======
-  if ($action === 'reject_payment') {
-    try {
-      // Ubah status langganan kembali menjadi 'free', dan reset beberapa kolom
-      $stmt = $pdo->prepare("
-        UPDATE shops SET 
-          subscription_status = 'free', 
-          product_limit       = 0,
-          last_payment_proof  = NULL, 
-          package_code        = NULL,    
-          updated_at          = NOW() 
-        WHERE id = ? 
-        LIMIT 1
-      ");
-      $stmt->execute([$id]);
+  // ====== Reject payment ======
+  if ($action==='reject_payment') {
+    $pdo->prepare("
+      UPDATE shops SET
+        subscription_status='free',
+        product_limit=0,
+        last_payment_proof=NULL,
+        package_code=NULL,
+        updated_at=NOW()
+      WHERE id=? LIMIT 1
+    ")->execute([$id]);
 
-      $_SESSION['flash_admin'] = "Pembayaran Toko ID {$id} ditolak. Status dikembalikan ke 'free'.";
-    } catch (Throwable $e) {
-      $_SESSION['flash_admin'] = "Gagal menolak pembayaran: " . $e->getMessage();
-    }
-
+    $_SESSION['flash_admin'] = "Pembayaran Toko ID {$id} ditolak.";
     header("Location: {$BASE}/admin/index.php");
     exit;
   }
 
-  // ====== SETUJUI PRODUK (AKTIFKAN) ======
-  if ($action === 'approve_product') {
-    try {
-      $stmt = $pdo->prepare("
-        UPDATE products
-        SET is_active = 1, updated_at = NOW()
-        WHERE id = ?
-        LIMIT 1
-      ");
-      $stmt->execute([$id]);
-
-      $_SESSION['flash_admin'] = "Produk ID {$id} berhasil disetujui dan kini aktif.";
-    } catch (Throwable $e) {
-      $_SESSION['flash_admin'] = "Gagal menyetujui produk: " . $e->getMessage();
-    }
-
+  // ====== Approve product ======
+  if ($action==='approve_product') {
+    $pdo->prepare("UPDATE products SET is_active=1,updated_at=NOW() WHERE id=? LIMIT 1")
+        ->execute([$id]);
+    $_SESSION['flash_admin'] = "Produk ID {$id} diaktifkan.";
     header("Location: {$BASE}/admin/index.php");
     exit;
   }
 
-  // ====== TOLAK / HAPUS PRODUK ======
-  if ($action === 'reject_product') {
-    try {
-      // Jika ingin benar-benar menghapus produk (dan relasinya)
-      $stmt = $pdo->prepare("DELETE FROM products WHERE id = ? LIMIT 1");
-      $stmt->execute([$id]);
-
-      $_SESSION['flash_admin'] = "Produk ID {$id} telah dihapus / ditolak.";
-    } catch (Throwable $e) {
-      $_SESSION['flash_admin'] = "Gagal menolak produk: " . $e->getMessage();
-    }
-
+  // ====== Reject product ======
+  if ($action==='reject_product') {
+    $pdo->prepare("DELETE FROM products WHERE id=? LIMIT 1")
+        ->execute([$id]);
+    $_SESSION['flash_admin'] = "Produk ID {$id} dihapus.";
     header("Location: {$BASE}/admin/index.php");
     exit;
   }
 }
 
 // ===============================================================
-// FLASH MESSAGE
+// FLASH
 // ===============================================================
 $flash = $_SESSION['flash_admin'] ?? '';
 unset($_SESSION['flash_admin']);
 
 // ===============================================================
-// STATISTIK
+// STATISTICS
 // ===============================================================
-$totalProducts = (int)($pdo->query("SELECT COUNT(*) FROM products WHERE is_active = 1")->fetchColumn() ?? 0);
-$totalShops    = (int)($pdo->query("SELECT COUNT(*) FROM shops")->fetchColumn() ?? 0);
-$pendingShops  = (int)($pdo->query("SELECT COUNT(*) FROM shops WHERE is_active = 0")->fetchColumn() ?? 0);
+$totalProducts = (int)$pdo->query("SELECT COUNT(*) FROM products WHERE is_active=1")->fetchColumn();
+$totalShops    = (int)$pdo->query("SELECT COUNT(*) FROM shops")->fetchColumn();
+$pendingShops  = (int)$pdo->query("SELECT COUNT(*) FROM shops WHERE is_active=0")->fetchColumn();
 
 // ===============================================================
-// TOKO AKTIF (is_active = 1)
+// ACTIVE SHOPS
 // ===============================================================
-$activeShops = [];
-try {
-  $stmt = $pdo->prepare("
-    SELECT 
-     s.id, s.name, s.address, s.is_active, s.created_at, u.full_name, u.email,
-     COUNT(p.id) AS total_products, SUM(CASE WHEN p.is_active = 1 THEN 1 ELSE 0 END) AS active_products
-    FROM shops s
-    JOIN users u ON u.id = s.user_id
-    LEFT JOIN products p ON p.shop_id = s.id
-    WHERE s.is_active = 1
-    GROUP BY s.id, s.name, s.address, s.is_active, s.created_at, u.full_name, u.email
-    ORDER BY s.created_at DESC
-    LIMIT 50
-  ");
-  $stmt->execute();
-  $activeShops = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (Throwable $e) {
-  $activeShops = [];
-}
+$stmt = $pdo->prepare("
+  SELECT s.id,s.name,s.address,s.is_active,s.created_at,u.full_name,u.email,
+  COUNT(p.id) AS total_products,
+  SUM(CASE WHEN p.is_active=1 THEN 1 ELSE 0 END) AS active_products
+  FROM shops s
+  JOIN users u ON u.id=s.user_id
+  LEFT JOIN products p ON p.shop_id=s.id
+  WHERE s.is_active=1
+  GROUP BY s.id
+  ORDER BY s.created_at DESC
+  LIMIT 50
+");
+$stmt->execute();
+$activeShops = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // ===============================================================
-// PERMINTAAN BUKA TOKO (is_active = 0)
+// PENDING SHOPS
 // ===============================================================
-$requests = [];
-try {
-  $stmt = $pdo->prepare("
-    SELECT 
-     s.id, s.user_id, s.name, s.address, s.latitude, s.longitude, s.created_at, u.email, u.full_name
-    FROM shops s
-    JOIN users u ON u.id = s.user_id
-    WHERE s.is_active = 0
-    ORDER BY s.created_at ASC
-    LIMIT 50
-  ");
-  $stmt->execute();
-  $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (Throwable $e) {
-  $requests = [];
-}
+$stmt = $pdo->prepare("
+  SELECT s.*,u.email,u.full_name
+  FROM shops s
+  JOIN users u ON u.id=s.user_id
+  WHERE s.is_active=0
+  ORDER BY s.created_at ASC
+  LIMIT 50
+");
+$stmt->execute();
+$requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // ===============================================================
-// VERIFIKASI PEMBAYARAN LANGGANAN (subscription_status = 'pending_payment')
+// PENDING PAYMENTS *** FIXED HERE ***
 // ===============================================================
-$pendingPayments = [];
-try {
-  $stmt = $pdo->prepare("
-    SELECT 
-     s.id,
-     s.name,
-     s.subscription_status,
-     s.last_payment_proof,   
-     s.package_code,      
-     s.updated_at,
-     u.full_name,
-     u.email
-    FROM shops s
-    JOIN users u ON u.id = s.user_id
-    WHERE s.subscription_status = 'pending_payment'
-    ORDER BY s.updated_at ASC
-    LIMIT 50
-  ");
-  $stmt->execute();
-  $pendingPayments = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (Throwable $e) {
-  $pendingPayments = [];
-}
+$stmt = $pdo->prepare("
+  SELECT 
+    s.id, s.name, s.subscription_status, s.last_payment_proof, 
+    s.package_code, s.updated_at,
+    u.full_name, u.email
+  FROM shops s
+  JOIN users u ON u.id=s.user_id
+  WHERE s.subscription_status = 'waiting_payment'
+  ORDER BY s.updated_at ASC
+  LIMIT 50
+");
+$stmt->execute();
+$pendingPayments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // ===============================================================
-// VERIFIKASI PRODUK (p.is_active = 0 & toko sudah aktif)
+// PENDING PRODUCTS
 // ===============================================================
-$pendingProducts = [];
-try {
-  $stmt = $pdo->prepare("
-    SELECT
-      p.id,
-      p.title,
-      p.price,
-      p.stock,
-      p.main_image,
-      p.created_at,
-      s.name      AS shop_name,
-      u.full_name AS owner_name,
-      u.email     AS owner_email
-    FROM products p
-    JOIN shops s ON s.id = p.shop_id
-    JOIN users u ON u.id = s.user_id
-    WHERE p.is_active = 0
-      AND s.is_active = 1
-    ORDER BY p.created_at ASC
-    LIMIT 50
-  ");
-  $stmt->execute();
-  $pendingProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (Throwable $e) {
-  $pendingProducts = [];
-}
+$stmt = $pdo->prepare("
+  SELECT p.*, s.name AS shop_name, u.full_name AS owner_name, u.email AS owner_email
+  FROM products p
+  JOIN shops s ON s.id=p.shop_id
+  JOIN users u ON u.id=s.user_id
+  WHERE p.is_active=0 AND s.is_active=1
+  ORDER BY p.created_at ASC
+  LIMIT 50
+");
+$stmt->execute();
+$pendingProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // ===============================================================
-// CATATAN / TRANSAKSI TERBARU
+// RECENT ORDERS
 // ===============================================================
-$notes = [];
-try {
-  $stmt = $pdo->prepare("
-    SELECT id, user_id, grand_total, status, created_at
-    FROM orders
-    ORDER BY created_at DESC
-    LIMIT 12
-  ");
-  $stmt->execute();
-  $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (Throwable $e) {
-  $notes = [];
-}
+$stmt = $pdo->prepare("
+  SELECT id,user_id,grand_total,status,created_at
+  FROM orders
+  ORDER BY created_at DESC
+  LIMIT 12
+");
+$stmt->execute();
+$notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // ===============================================================
 // HEADER (pakai header global) + CSS khusus admin
