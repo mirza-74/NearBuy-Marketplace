@@ -275,11 +275,7 @@ try {
 <div class="page-wrap">
   <div class="content">
 
-    <section class="banner">
-      <?php if ($homeBannerPath): ?>
-        <img src="<?= e($homeBannerPath) ?>" alt="NearBuy" class="banner-img" loading="lazy">
-      <?php endif; ?>
-    </section>
+    
 
     <section class="search">
       <form method="get" action="<?= e($BASE) ?>/index.php">

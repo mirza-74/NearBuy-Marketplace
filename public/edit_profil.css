@@ -1,0 +1,185 @@
+/* ==================================== */
+/* 1. VARIABEL & RESET DASAR           */
+/* ==================================== */
+:root {
+    --color-primary: #007bff; /* Biru/Navy modern untuk aksi utama */
+    --color-primary-dark: #0056b3;
+    --color-accent: #28a745; /* Hijau untuk success/secondary action */
+    --color-text-dark: #333;
+    --color-text-light: #6c757d;
+    --color-background-soft: #f4f7f9; /* Background halaman yang nyaman */
+    --color-card-bg: #ffffff;
+    --color-border-light: #e9ecef; /* Garis pemisah/border halus */
+    --color-error: #dc3545;
+    --font-stack: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+body {
+    font-family: var(--font-stack);
+    background-color: var(--color-background-soft);
+}
+
+/* ==================================== */
+/* 2. LAYOUT UTAMA & KARTU PROFIL      */
+/* ==================================== */
+.profile-page-simple {
+    display: flex;
+    justify-content: center;
+    padding: 50px 20px;
+    min-height: 90vh;
+}
+
+.profile-card {
+    width: 100%;
+    max-width: 700px;
+    background-color: var(--color-card-bg);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Efek shadow yang elegan */
+    padding: 35px 40px;
+}
+
+.profile-card h1 {
+    font-size: 2em;
+    color: var(--color-text-dark);
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.profile-subtitle {
+    color: var(--color-text-light);
+    margin-bottom: 25px;
+    font-size: 0.95em;
+    border-bottom: 1px solid var(--color-border-light);
+    padding-bottom: 15px;
+}
+
+/* ==================================== */
+/* 3. FORM & INPUT STYLE               */
+/* ==================================== */
+.profile-form label {
+    display: block;
+    margin-top: 18px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--color-text-dark);
+    font-size: 0.95em;
+}
+
+.profile-form input:not([type="hidden"]),
+.profile-form select,
+.profile-form textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--color-border-light);
+    border-radius: 6px;
+    box-sizing: border-box; 
+    font-size: 1em;
+    color: var(--color-text-dark);
+    background-color: #fcfcfc;
+    transition: all 0.2s ease;
+}
+
+.profile-form input:focus,
+.profile-form select:focus,
+.profile-form textarea:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    outline: none;
+    background-color: var(--color-card-bg);
+}
+
+.profile-form textarea {
+    resize: vertical;
+}
+
+/* --- Layout Baris (Gender/Tanggal Lahir) --- */
+.profile-row {
+    display: flex;
+    gap: 20px;
+}
+
+.profile-col {
+    flex: 1;
+}
+
+/* Media query untuk tampilan mobile */
+@media (max-width: 650px) {
+    .profile-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    .profile-card {
+        padding: 25px 20px;
+    }
+}
+
+/* ==================================== */
+/* 4. ALERT & BUTTONS                  */
+/* ==================================== */
+.alert {
+    padding: 15px;
+    margin-bottom: 25px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    color: var(--color-error);
+    border: 1px solid #f5c6cb;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: var(--color-accent);
+    border: 1px solid #c3e6cb;
+}
+
+/* Tombol Dasar */
+.btn-primary, .btn-secondary {
+    display: inline-block;
+    padding: 12px 25px;
+    border-radius: 6px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s, transform 0.1s;
+    border: none;
+}
+
+/* Tombol Primary (Simpan Perubahan) */
+.btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+    width: 100%;
+    margin-top: 30px;
+}
+
+.btn-primary:hover {
+    background-color: var(--color-primary-dark);
+}
+
+.btn-primary:active {
+    transform: translateY(1px);
+}
+
+/* Tautan Sekunder (Ganti Password) */
+.profile-links {
+    margin-top: 15px;
+    margin-bottom: 25px;
+    text-align: right;
+}
+
+.profile-links a.btn-secondary {
+    background-color: #f0f0f0;
+    color: var(--color-text-light);
+    padding: 10px 20px; 
+    font-weight: 500;
+    border: 1px solid var(--color-border-light);
+}
+
+.profile-links a.btn-secondary:hover {
+    background-color: #e4e4e4;
+    color: var(--color-text-dark);
+}

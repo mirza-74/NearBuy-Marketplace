@@ -126,7 +126,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // ========================
 // VIEW
 // ========================
-$EXTRA_CSS = ['style-profil.css'];
+// PASTIKAN NAMA FILE CSS DAN PATH SUDAH BENAR
+$EXTRA_CSS = ['edit_profil.css'];
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
@@ -137,6 +138,10 @@ require_once __DIR__ . '/../includes/header.php';
       Perbarui biodata yang kamu isi saat registrasi akun NearBuy.
     </p>
 
+    <p class="profile-links">
+        <a href="<?= $BASE ?>/ganti_password.php" class="btn-secondary">Ganti Password</a>
+    </p>
+    
     <?php if ($error): ?>
       <div class="alert alert-error"><?= h($error) ?></div>
     <?php elseif ($success): ?>
