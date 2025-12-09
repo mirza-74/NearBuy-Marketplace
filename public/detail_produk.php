@@ -510,13 +510,6 @@ try {
               <input id="qty" type="number" name="qty" min="1" max="<?= $stock ?>" value="1">
             </div>
 
-            <div class="detail-buttons">
-              <button type="submit" class="btn-primary">
-                + Keranjang
-              </button>
-            </div>
-          </form>
-
           <form method="post" action="<?= e($BASE) ?>/pesan.php" class="detail-form-inline">
             <?php if (function_exists('csrf_input')) { csrf_input(); } ?>
             <input type="hidden" name="product_id" value="<?= (int)$productId ?>">
