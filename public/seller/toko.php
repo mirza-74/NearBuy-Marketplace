@@ -61,7 +61,16 @@ require_once __DIR__ . '/../../includes/header.php';
 
   <?php if (!empty($_SESSION['flash'])): ?>
     <div class="nb-flash">
-      <?= e($_SESSION['flash']); unset($_SESSION['flash']); ?>
+      <?php
+        $flash = $_SESSION['flash'];
+        unset($_SESSION['flash']);
+
+        if (is_array($flash)) {
+            echo e($flash['message'] ?? 'Terjadi kesalahan');
+        } else {
+            echo e($flash);
+        }
+      ?>
     </div>
   <?php endif; ?>
 
@@ -279,7 +288,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
   <?php else: ?>
     <!-- ================================================== -->
-    <!-- USER BELUM PUNYA TOKO                             -->
+    <!-- USER BELUM PUNYA TOKO -->
     <!-- ================================================== -->
 
     <section class="nb-card nb-main-card">
