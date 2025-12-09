@@ -173,14 +173,14 @@ if ($user && in_array($role, ['pengguna', 'seller'], true)) {
           <?= e($shopMenuLabel) ?>
         </a>
 
-        <a href="<?= e($BASE) ?>/keranjang.php">🛒 Keranjang</a>
+        
         <a href="<?= e($BASE) ?>/profil.php">👤 Profil</a>
         <a href="<?= e($BASE) ?>/logout.php" class="logout">Logout</a>
 
       <?php elseif ($role === 'admin'): ?>
 
         <a href="<?= e($BASE_ADMIN) ?>/index.php">📊 Admin Dashboard</a>
-        <a href="<?= e($BASE_ADMIN) ?>/pengguna.php">👥 Kelola Pengguna</a>
+        <a href="<?= e($BASE_ADMIN) ?>/kelola_pengguna.php">👥 Kelola Pengguna</a>
         <a href="<?= e($BASE) ?>/logout.php" class="logout">Logout</a>
 
       <?php endif; ?>
