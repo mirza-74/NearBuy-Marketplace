@@ -1166,3 +1166,66 @@ body{
     from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
 }
+
+/* =========================================
+   NearBuy tambahan (untuk index.php)
+========================================= */
+
+/* jarak toko */
+.distance{
+  font-size:0.8rem;
+  color:#6b7280;
+  margin-top:2px;
+}
+
+/* info pembayaran */
+.payment-info{
+  font-size:0.8rem;
+  color:#16a34a;
+  margin-top:4px;
+}
+
+/* tombol aktifkan lokasi */
+.btn-lokasi{
+  display:inline-block;
+  padding:8px 12px;
+  border-radius:10px;
+  background:linear-gradient(145deg,var(--brand-a),var(--brand-b));
+  color:#111827;
+  font-weight:600;
+  text-decoration:none;
+  margin-top:6px;
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
+  transition:transform .15s ease, filter .15s ease;
+}
+
+.btn-lokasi:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.05);
+}
+
+/* memperbaiki tampilan sidebar kategori */
+.sidebar ul{
+  list-style:none;
+  padding:0;
+  margin:8px 0 0 0;
+}
+
+.sidebar li{
+  margin-bottom:6px;
+}
+
+.sidebar a{
+  text-decoration:none;
+  color:#1f2937;
+  font-size:0.9rem;
+}
+
+.sidebar a:hover{
+  color:#3555ff;
+}
+
+/* memastikan grid produk tetap rapi */
+.produk-grid{
+  margin-top:10px;
+}

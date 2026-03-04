@@ -1,13 +1,9 @@
 <?php
-// ===============================================================
-// NearBuy – Tentang (Versi Final: Logo dan Teks di Hero Section, CTA Fix)
-// ===============================================================
 declare(strict_types=1);
 
 $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
 $BASE = rtrim($scriptDir, '/');
 
-// Pastikan file-file berikut ada di path yang benar:
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/settings.php';
@@ -15,251 +11,295 @@ require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <style>
-/* ===============================================================
- * CSS Override untuk Full Width (Menghilangkan Sidebar)
- * =============================================================== */
-.content {
-  width: 100% !important; 
-  float: none !important;
-}
-.page-wrap {
-  display: block !important; 
-  grid-template-columns: 1fr !important;
+
+/* =========================
+LAYOUT FULL WIDTH
+========================= */
+
+.page-wrap{
+display:block !important;
 }
 
-/* ===============================================================
- * General Styling & Layout
- * =============================================================== */
- .about-wrapper {
-  padding: 0;
-  animation: fadeIn .4s ease;
-  margin: 0 auto;
- }
-
- .section-card-container {
-  max-width: 1100px; 
-  margin: 0 auto;
-  padding: 0 20px; 
- }
- 
- .section-card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 25px;
-  margin-bottom: 20px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.08); 
- }
-
- .section-card h2 {
-  font-size: 1.6rem;
-  margin-bottom: 12px;
-  color: #1f2937;
-  border-left: 4px solid #3b82f6;
-  padding-left: 12px;
-  font-weight: 700;
- }
-
- .section-card p, .section-card ul {
-  line-height: 1.7;
-  color: #4b5563;
-  margin-bottom: 0;
- }
-
- .section-card ul {
-  padding-left: 20px;
- }
-
-/* ===============================================================
- * Hero Section (Logo dan Teks di Tengah)
- * =============================================================== */
-.about-hero {
-  /* Latar belakang abu-abu seperti di gambar */
-
-  padding: 80px 5vw; 
-  border-radius: 0;
-  color: black; /* Teks di hero berwarna putih */
-  margin-bottom: 30px;
-  min-height: 250px;
-  position: relative;
-  text-align: center;
-}
- 
-/* Hapus overlay jika tidak dibutuhkan, biarkan warna logo utama mendominasi */
-.about-hero::before {
-  content: none; 
+.content{
+width:100% !important;
 }
 
-.hero-content-inner {
-  max-width: 1100px; 
-  margin: 0 auto;
-  position: relative;
-  z-index: 2; 
-  padding: 0 20px; 
-  
-  /* Flexbox untuk menempatkan semua elemen di tengah */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+/* =========================
+HERO
+========================= */
+
+.about-hero{
+text-align:center;
+padding:80px 20px;
+background:linear-gradient(145deg,#eaf3ff,#f6f9ff);
+border-radius:16px;
+margin-bottom:30px;
 }
 
-.about-hero h1 {
-  font-size: 3rem;
-  margin-top: 10px; 
-  margin-bottom: 10px;
-  font-weight: 900;
-  color: black; /* Judul berwarna putih */
-  text-shadow: 1px 1px 3px rgba(245, 242, 242, 0.6);
+.logo-hero{
+max-width:300px;
+margin-bottom:15px;
 }
 
-.about-hero p {
-  opacity: 1;
-  font-size: 1.2rem;
-  max-width: 600px;
-  color: black; /* Deskripsi berwarna putih */
-  text-shadow: 1px 1px 3px rgba(245, 243, 243, 0.6);
+.about-hero h1{
+font-size:2.5rem;
+margin-bottom:10px;
+color:#111827;
 }
 
-/* ===============================================================
- * Logo di Hero Section (Placeholder Logo Besar)
- * =============================================================== */
- .logo-hero {
-  /* Ganti path gambar ini ke logo Anda (Pin Map dan Teks 'NearBuy' yang berwarna biru) */
-  max-width: 450px; 
-  height: auto;
-  margin-bottom: 20px; 
-  margin-top: 0; 
+.about-hero p{
+font-size:1.1rem;
+color:#4b5563;
+max-width:600px;
+margin:auto;
 }
 
-/* ===============================================================
- * CTA (Call to Action) Styling
- * =============================================================== */
- .cta-center {
-  text-align: center;
-  margin-top: 30px;
-  margin-bottom: 40px;
- }
+/* =========================
+SECTION
+========================= */
 
-.btn-primary {
-  background: #3b82f6;
-  padding: 14px 28px;
-  color: white;
-  border-radius: 12px;
-  text-decoration: none;
-  font-size: 1.1rem;
-  font-weight: 600;
-  transition: .3s;
-  display: inline-block;
+.about-container{
+max-width:1000px;
+margin:auto;
+padding:0 20px;
 }
 
-.btn-primary:hover {
-  background: #2563eb;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+.section-card{
+background:#fff;
+padding:25px;
+border-radius:14px;
+margin-bottom:20px;
+box-shadow:0 4px 15px rgba(0,0,0,0.08);
 }
 
-.note-box {
-  background: #f0f4ff;
-  padding: 15px;
-  border-left: 5px solid #3b82f6;
-  border-radius: 10px;
-  margin-top: 25px;
-  color: #475569;
-  font-size: 0.95rem;
+.section-card h2{
+font-size:1.4rem;
+margin-bottom:10px;
+color:#111827;
+border-left:4px solid #3b82f6;
+padding-left:10px;
 }
 
-/* ===============================================================
- * Responsiveness
- * =============================================================== */
-@media (max-width: 768px) {
- .vision-mission-grid {
-   grid-template-columns: 1fr;
- }
- .about-hero h1 {
-   font-size: 2.5rem;
- }
- .logo-hero {
-   max-width: 90%;
- }
+.section-card p{
+line-height:1.7;
+color:#4b5563;
 }
+
+.section-card ul{
+padding-left:20px;
+color:#4b5563;
+line-height:1.7;
+}
+
+/* =========================
+FITUR
+========================= */
+
+.feature-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:15px;
+margin-top:15px;
+}
+
+.feature-item{
+background:#f8fafc;
+padding:15px;
+border-radius:12px;
+font-size:0.95rem;
+}
+
+/* =========================
+NOTE BOX
+========================= */
+
+.note-box{
+background:#eef4ff;
+padding:15px;
+border-left:5px solid #3b82f6;
+border-radius:10px;
+margin-top:15px;
+font-size:0.95rem;
+color:#334155;
+}
+
+/* =========================
+CTA
+========================= */
+
+.cta-center{
+text-align:center;
+margin-top:30px;
+}
+
+.btn-primary{
+background:#3b82f6;
+color:white;
+padding:12px 24px;
+border-radius:10px;
+text-decoration:none;
+font-weight:600;
+}
+
+.btn-primary:hover{
+background:#2563eb;
+}
+
 </style>
 
 
 <div class="page-wrap">
 <div class="content">
 
- <div class="about-wrapper">
+<header class="about-hero">
 
-  <header class="about-hero">
-   <div class="hero-content-inner">
-            <img src="<?= e($BASE) ?>/assets/logo_nearbuy.png" alt="Logo NearBuy Lengkap" class="logo-hero">
-          
-     <h1>Tentang Kami</h1>
-     <p>Platform belanja berbasis lokasi yang menghubungkan Anda dengan kebutuhan terdekat.</p>
-   </div> 
-  </header>
+<img src="<?= e($BASE) ?>/assets/logo_nearbuy.png" class="logo-hero">
 
-  <div class="section-card-container">
+<h1>Tentang NearBuy</h1>
 
-   <section class="section-card">
-    <h2>Apa itu NearBuy?</h2>
-    <p>
-     NearBuy lahir dari semangat untuk **mendekatkan penjual lokal dengan konsumen di sekitarnya**. Kami adalah platform *e-commerce* yang menggunakan teknologi pintar berbasis lokasi untuk menampilkan produk dan toko yang berada paling dekat dengan posisi Anda. Ini berarti pengiriman produk menjadi **lebih cepat, lebih hemat biaya, dan lebih mendukung ekonomi lokal.**
-    </p>
-   </section>
-   
-     <div class="vision-mission-grid">
-    <section class="section-card">
-     <h2>✨ Visi Kami</h2>
-     <p>
-      **Menjadi solusi belanja harian utama yang paling efisien dan terpercaya** dengan memberdayakan setiap UMKM agar mampu bersaing secara digital di lingkungan lokal mereka.
-     </p>
-    </section>
-    
-    <section class="section-card">
-     <h2>🎯 Misi Kami</h2>
-     <ul>
-      <li>Memberikan pengalaman belanja harian yang cepat, mudah, dan hemat biaya melalui teknologi geo-lokasi.</li>
-      <li>Membantu pertumbuhan UMKM dengan memberikan akses ke pasar digital tanpa perlu bersaing dengan toko jarak jauh.</li>
-      <li>Membangun komunitas lokal yang kuat dan saling mendukung antara penjual dan pembeli.</li>
-     </ul>
-    </section>
-    </div>
+<p>
+Platform marketplace berbasis lokasi yang membantu pengguna
+menemukan kebutuhan harian dari penjual lokal di sekitar mereka.
+</p>
 
-   <section class="section-card">
-    <h2>Keunggulan NearBuy</h2>
+</header>
 
-    <div class="feature-list">
-     <div class="feature-item">
-      <div class="feature-icon">📍</div>
-      <div><b>Belanja Berbasis Lokasi</b><br>Toko terdekat, pengiriman super cepat, dan ongkir minimal.</div>
-     </div>
-     <div class="feature-item">
-      <div class="feature-icon">🔍</div>
-      <div><b>Temukan Toko Lokal Terbaik</b><br>Dukung UMKM di lingkungan Anda sambil memenuhi kebutuhan harian.</div>
-     </div>
-     <div class="feature-item">
-      <div class="feature-icon">🔄</div>
-      <div><b>Sistem Rekomendasi Pintar</b><br>Lihat penawaran yang benar-benar relevan dengan tempat tinggalmu.</div>
-     </div>
-     <div class="feature-item">
-      <div class="feature-icon">🛒</div>
-      <div><b>Pilihan Kebutuhan Harian Lengkap</b><br>Dari bahan pokok, makanan siap saji, hingga jasa lokal.</div>
-     </div>
-    </div>
-   </section>
 
-   <div class="note-box">
-    💡 Catatan Penting: **NearBuy adalah platform penghubung**. Semua produk dan layanan dimiliki, dikelola, dan dikirim oleh mitra penjual lokal kami (UMKM). Kami berkomitmen pada kualitas dan transparansi.
-   </div>
+<div class="about-container">
 
-           <div class="cta-center">
-    <a href="<?= e($BASE) ?>/index.php" class="btn-primary">Mulai Belanja Sekarang →</a>
-   </div>
-        
-  </div>  </div> </div>
+
+<section class="section-card">
+
+<h2>Apa itu NearBuy?</h2>
+
+<p>
+NearBuy adalah platform marketplace yang menghubungkan pembeli dengan 
+penjual lokal berdasarkan lokasi pengguna. Dengan memanfaatkan teknologi 
+lokasi perangkat, NearBuy dapat menampilkan produk dari toko yang berada 
+di sekitar pengguna sehingga kebutuhan harian dapat ditemukan dengan 
+lebih cepat dan efisien.
+</p>
+
+<p>
+NearBuy berperan sebagai perantara yang mempertemukan pembeli dan penjual. 
+Semua produk dijual langsung oleh penjual lokal, sedangkan proses 
+pembayaran dilakukan langsung kepada penjual melalui QRIS atau metode 
+COD (Cash on Delivery).
+</p>
+
+</section>
+
+
+<section class="section-card">
+
+<h2>Cara Kerja NearBuy</h2>
+
+<ul>
+
+<li>Pengguna mengaktifkan lokasi perangkat.</li>
+
+<li>Sistem menampilkan produk dari penjual yang berada di sekitar lokasi pengguna.</li>
+
+<li>Pembeli memilih produk dan melakukan pemesanan.</li>
+
+<li>Pembayaran dilakukan langsung kepada penjual melalui QRIS atau COD.</li>
+
+<li>Pembeli mengonfirmasi penerimaan barang melalui sistem.</li>
+
+</ul>
+
+</section>
+
+
+<section class="section-card">
+
+<h2>Visi</h2>
+
+<p>
+Menjadi platform marketplace lokal yang membantu masyarakat menemukan 
+kebutuhan harian secara lebih cepat serta mendukung pertumbuhan penjual 
+lokal dan UMKM di lingkungan sekitar.
+</p>
+
+</section>
+
+
+<section class="section-card">
+
+<h2>Misi</h2>
+
+<ul>
+
+<li>Menyediakan platform pencarian produk berbasis lokasi untuk kebutuhan harian.</li>
+
+<li>Menghubungkan pembeli dengan penjual lokal secara lebih efisien.</li>
+
+<li>Mendukung digitalisasi UMKM agar lebih mudah menjangkau konsumen sekitar.</li>
+
+<li>Memberikan pengalaman belanja yang sederhana dan mudah digunakan.</li>
+
+</ul>
+
+</section>
+
+
+<section class="section-card">
+
+<h2>Keunggulan NearBuy</h2>
+
+<div class="feature-grid">
+
+<div class="feature-item">
+📍 <b>Pencarian Berdasarkan Lokasi</b><br>
+Menampilkan produk dari penjual yang berada di sekitar pengguna.
 </div>
 
+<div class="feature-item">
+🏪 <b>Mendukung Penjual Lokal</b><br>
+Membantu UMKM menjangkau konsumen di area sekitar.
+</div>
+
+<div class="feature-item">
+💳 <b>Pembayaran Fleksibel</b><br>
+Pembayaran dapat dilakukan melalui QRIS atau COD langsung ke penjual.
+</div>
+
+<div class="feature-item">
+📊 <b>Laporan Produk Terlaris</b><br>
+Penjual dapat melihat produk yang paling banyak terjual.
+</div>
+
+</div>
+
+</section>
+
+
+<div class="note-box">
+
+NearBuy adalah platform perantara yang mempertemukan pembeli dan penjual.
+Seluruh produk dan layanan disediakan oleh penjual lokal.
+NearBuy tidak terlibat langsung dalam proses pengiriman maupun transaksi
+pembayaran antara pembeli dan penjual.
+
+</div>
+
+
+<div class="cta-center">
+
+<a href="<?= e($BASE) ?>/index.php" class="btn-primary">
+Mulai Belanja Sekarang
+</a>
+
+</div>
+
+
+</div>
+</div>
+</div>
+
+
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+
 </main>
 </body>
 </html>
