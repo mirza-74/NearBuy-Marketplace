@@ -15,32 +15,32 @@ $userLng = $_SESSION['user_lng'] ?? null;
 
 /* ================= KATEGORI ================= */
 
-$categories = [];
+$categories=[];
 
-try {
+try{
 
-$stmtCat = $pdo->prepare("
-SELECT id, name, slug
+$stmt=$pdo->prepare("
+SELECT id,name,slug
 FROM categories
 ORDER BY name ASC
 ");
 
-$stmtCat->execute();
-$categories = $stmtCat->fetchAll(PDO::FETCH_ASSOC);
+$stmt->execute();
+$categories=$stmt->fetchAll(PDO::FETCH_ASSOC);
 
-} catch (Throwable $e) {
-$categories = [];
+}catch(Throwable $e){
+$categories=[];
 }
 
 
 /* ================= SEARCH ================= */
 
-$searchQRaw = isset($_GET['q']) ? trim((string)$_GET['q']) : '';
-$searchQ = mb_substr($searchQRaw,0,80);
+$searchQRaw=isset($_GET['q'])?trim((string)$_GET['q']):'';
+$searchQ=mb_substr($searchQRaw,0,80);
 
 $whereParts=[
-"p.is_active = 1",
-"p.stock > 0",
+"p.is_active=1",
+"p.stock>0",
 "u.role='seller'",
 "s.is_active=1"
 ];
@@ -81,7 +81,7 @@ s.name AS shop_name,
 6371 * ACOS(
 COS(RADIANS(:lat))
 * COS(RADIANS(s.latitude))
-* COS(RADIANS(s.longitude) - RADIANS(:lng))
+* COS(RADIANS(s.longitude)-RADIANS(:lng))
 + SIN(RADIANS(:lat))
 * SIN(RADIANS(s.latitude))
 )
@@ -93,7 +93,7 @@ JOIN users u ON u.id=s.user_id
 
 WHERE {$whereSql}
 
-HAVING distance_km <= :radius
+HAVING distance_km<=:radius
 
 ORDER BY distance_km ASC
 LIMIT 8
@@ -150,7 +150,6 @@ LIMIT 12
 
 $stmt=$pdo->prepare($sql);
 $stmt->execute($params);
-
 $produk=$stmt->fetchAll(PDO::FETCH_ASSOC);
 
 }catch(Throwable $e){
@@ -171,9 +170,13 @@ return $img;
 }
 
 return $BASE."/uploads/".$img;
+
 }
 
 ?>
+
+<link rel="stylesheet" href="<?= e($BASE) ?>/location-ui.css">
+
 
 <div class="page-wrap">
 
@@ -204,15 +207,32 @@ Cari
 
 <h2>Produk Terdekat</h2>
 
+
 <?php if(!$userLat): ?>
 
+<div class="location-box">
+
 <p>
-Aktifkan lokasi agar NearBuy dapat menampilkan penjual terdekat dari posisi kamu.
+📍 NearBuy membutuhkan lokasi kamu untuk menampilkan produk terdekat.
 </p>
 
-<a href="<?= e($BASE) ?>/set_lokasi.php" class="btn-lokasi">
-Aktifkan Lokasi
+<button id="btnLocation" class="btn-lokasi">
+Gunakan Lokasi Saya
+</button>
+
+</div>
+
+<?php else: ?>
+
+<div class="location-active">
+
+📍 Lokasi kamu aktif
+
+<a href="<?= e($BASE) ?>/set_lokasi.php">
+Ubah lokasi
 </a>
+
+</div>
 
 <?php endif; ?>
 
@@ -295,8 +315,6 @@ QRIS / COD
 
 <div class="produk-grid">
 
-<?php if(!empty($produk)): ?>
-
 <?php foreach($produk as $p):
 
 $img=image_url($p['main_image'],$BASE);
@@ -341,12 +359,6 @@ Rp<?= number_format((float)$p['price'],0,',','.') ?>
 
 <?php endforeach; ?>
 
-<?php else: ?>
-
-<p>Produk tidak ditemukan.</p>
-
-<?php endif; ?>
-
 </div>
 
 </section>
@@ -361,8 +373,6 @@ Rp<?= number_format((float)$p['price'],0,',','.') ?>
 
 <h4>Kategori Produk</h4>
 
-<?php if (!empty($categories)): ?>
-
 <ul>
 
 <li>
@@ -371,7 +381,7 @@ Semua Produk
 </a>
 </li>
 
-<?php foreach ($categories as $cat): ?>
+<?php foreach($categories as $cat): ?>
 
 <li>
 <a href="<?= e($BASE) ?>/kategori.php?slug=<?= urlencode($cat['slug']) ?>">
@@ -383,20 +393,61 @@ Semua Produk
 
 </ul>
 
-<?php else: ?>
-
-<p>Belum ada kategori.</p>
-
-<?php endif; ?>
-
 </div>
 
 </aside>
 
 </div>
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
 
+
+<script>
+
+const baseUrl="<?= e($BASE) ?>";
+
+document.getElementById("btnLocation")?.addEventListener("click",function(){
+
+if(!navigator.geolocation){
+alert("Browser tidak mendukung lokasi");
+return;
+}
+
+navigator.geolocation.getCurrentPosition(function(pos){
+
+const lat=pos.coords.latitude;
+const lng=pos.coords.longitude;
+
+const formData=new FormData();
+formData.append("lat",lat);
+formData.append("lng",lng);
+
+fetch(baseUrl+"/save_location.php",{
+method:"POST",
+body:formData
+})
+.then(r=>r.json())
+.then(data=>{
+
+if(data.status==="ok"){
+location.reload();
+}else{
+alert("Gagal menyimpan lokasi");
+}
+
+});
+
+},function(){
+
+alert("Izin lokasi diperlukan untuk menampilkan produk terdekat");
+
+});
+
+});
+
+</script>
+
+
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>
 </main>
 </body>
 </html>
